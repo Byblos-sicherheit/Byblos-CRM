@@ -1,0 +1,33 @@
+[Unit]
+Description=Byblos CRM v2 - Sicherheitsdienst Management System
+Documentation=https://github.com/byblos/crm
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=%i
+Group=%i
+WorkingDirectory=/home/%i/.byblos_crm/app
+ExecStartPre=/usr/bin/python3 -c "import sys; sys.path.insert(0,'.'); import app; app.init_db()"
+ExecStart=/usr/bin/python3 -m streamlit run app.py \
+    --server.port=8501 \
+    --server.address=0.0.0.0 \
+    --server.headless=true \
+    --browser.gatherUsageStats=false
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=byblos-crm
+TimeoutStartSec=60
+
+# Sicherheits-Einstellungen
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ReadWritePaths=/home/%i/.byblos_crm
+
+[Install]
+WantedBy=multi-user.target

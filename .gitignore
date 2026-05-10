@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+venv/
+env/
+.venv/
+*.egg-info/
+dist/
+build/
+
+# Byblos CRM - Nutzer-Daten (NIEMALS committen!)
+byblos_crm_app/byblos_crm.db
+byblos_crm_app/byblos_crm.db-shm
+byblos_crm_app/byblos_crm.db-wal
+byblos_crm_app/backups/
+byblos_crm_app/generated/
+byblos_crm_app/imports/
+byblos_crm_app/assets/logo.*
+
+# Tunnel-Zustand
+.byblos_crm/tunnel_state.json
+*.enc
+
+# Streamlit Cache
+.streamlit/secrets.toml
+byblos_crm_app/.streamlit/secrets.toml
+
+# API Keys / Secrets (NIEMALS committen!)
+*.key
+*.pem
+*.crt
+secrets.json
+config.secret.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+/tmp/byblos*.log
+
+# Docker
+docker-compose.override.yml
+
+# Inno Setup temporär
+Output/
+*.exe

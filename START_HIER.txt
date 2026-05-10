@@ -1,0 +1,49 @@
+====================================================
+  BYBLOS CRM v2.0 - START HIER
+====================================================
+
+SCHRITT 1 – WINDOWS EXE ERSTELLEN:
+  → BUILD_WINDOWS.bat per DOPPELKLICK starten
+     (liegt in DIESEM Ordner, nicht im Unterordner!)
+  → 2-5 Minuten warten
+  → dist\ByblosCRM\ByblosCRM.exe testen
+
+  WICHTIG: Beim ersten Build braucht Python Internetzugang
+  fuer den Download der Bibliotheken (~200 MB).
+
+----------------------------------------------------
+
+SCHRITT 2 – DIREKTSTART (ohne Build, zum Testen):
+  → byblos_crm_app\start_windows.bat starten
+  Oder manuell:
+    cd byblos_crm_app
+    pip install streamlit pandas reportlab openpyxl
+    streamlit run app.py
+
+----------------------------------------------------
+
+SCHRITT 3 – MSIX (Windows Store / Sideload):
+  Voraussetzung: BUILD_WINDOWS.bat erfolgreich
+  → PowerShell als Admin oeffnen
+  → .\msix\build_msix.ps1
+
+----------------------------------------------------
+
+SCHRITT 4 – ANDROID APK:
+  Voraussetzung: Android Studio installiert
+  → android\build_apk.bat (Windows)
+  → android/build_apk.sh  (Mac/Linux)
+  Server-URL anpassen in:
+    android\app\src\main\java\de\byblos_sicherheit\crm\MainActivity.java
+    Zeile: private static final String CRM_URL = "..."
+
+----------------------------------------------------
+
+PROBLEME? Siehe: FEHLERBEHEBUNG.md
+
+PASSWORT VERGESSEN?
+  Standard-Login nach Erstinstallation:
+  Benutzer: admin
+  Passwort: admin123
+
+====================================================

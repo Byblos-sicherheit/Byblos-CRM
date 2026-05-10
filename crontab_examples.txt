@@ -1,0 +1,11 @@
+# Byblos CRM Cron-Beispiele
+# Pfade anpassen: /opt/byblos_crm_app durch deinen echten App-Ordner ersetzen.
+
+# Healthcheck alle 5 Minuten
+*/5 * * * * CRM_URL=https://crm.byblos-sicherheit.de ALERT_EMAIL=info@byblos-sicherheit.de /opt/byblos_crm_app/scripts/check_crm.sh >> /opt/byblos_crm_app/logs/healthcheck.log 2>&1
+
+# Tägliche Automatik um 02:00: Mahnungen vorbereiten, Bankabgleich vorschlagen, KPIs berechnen, Backup erstellen
+0 2 * * * cd /opt/byblos_crm_app && /usr/bin/python3 scripts/run_daily_automation.py >> /opt/byblos_crm_app/logs/daily_automation.log 2>&1
+
+# Backup-Restore-Test täglich um 03:00
+0 3 * * * /opt/byblos_crm_app/scripts/restore_test.sh >> /opt/byblos_crm_app/logs/restore_test.log 2>&1
