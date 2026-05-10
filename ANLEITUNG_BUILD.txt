@@ -1,0 +1,117 @@
+=====================================================
+  Byblos CRM v2 - Build-Anleitung
+  Erstellt: 2025
+=====================================================
+
+WICHTIG: Lies diese Anleitung VOR dem ersten Build!
+
+─────────────────────────────────────────────────────
+SCHRITT 0: Projekt richtig entpacken
+─────────────────────────────────────────────────────
+Das ZIP-Paket entpacken nach:
+  C:\ByblosCRM\
+
+NICHT in einen Pfad mit Sonderzeichen wie:
+  C:\Users\fadla\Desktop\- Rechnungs Angebot\...
+  (Leerzeichen und Bindestriche verursachen Fehler!)
+
+Empfohlene Struktur:
+  C:\ByblosCRM\
+    BUILD_WINDOWS.bat          <- Hauptskript
+    byblos_crm_app\
+      app.py
+      requirements.txt
+      launcher.py
+    installer\
+      build_exe.bat
+      inno_setup.iss
+    ...
+
+─────────────────────────────────────────────────────
+SCHRITT 1: Voraussetzungen installieren
+─────────────────────────────────────────────────────
+a) Python 3.10 oder neuer:
+   https://python.org/downloads
+   WICHTIG beim Installieren:
+   [x] "Add Python to PATH" anhaaken!
+
+b) Systemvoraussetzungen pruefen:
+   scripts\precheck_windows.bat doppelklicken
+
+─────────────────────────────────────────────────────
+SCHRITT 2: Windows EXE bauen
+─────────────────────────────────────────────────────
+  BUILD_WINDOWS.bat doppelklicken
+
+  (Alternativ: installer\build_exe.bat)
+
+  Ergebnis: dist\ByblosCRM\ByblosCRM.exe
+  Dauer: ca. 3-10 Minuten beim ersten Mal
+
+─────────────────────────────────────────────────────
+SCHRITT 3: EXE testen
+─────────────────────────────────────────────────────
+  dist\ByblosCRM\ByblosCRM.exe doppelklicken
+  -> Browser oeffnet sich mit dem CRM
+
+─────────────────────────────────────────────────────
+SCHRITT 4: Setup-Installer (optional)
+─────────────────────────────────────────────────────
+Fuer einen professionellen Windows-Installer (.exe):
+  a) Inno Setup installieren:
+     https://jrsoftware.org/isinfo.php
+  b) build_exe.bat ausfuehren (Step 2)
+  c) Inno Setup oeffnet sich automatisch
+  d) Ergebnis: installer\Output\ByblosCRMSetup_2.0.0.exe
+
+─────────────────────────────────────────────────────
+SCHRITT 5: MSIX (Windows Store / Sideload)
+─────────────────────────────────────────────────────
+  Voraussetzung: Windows SDK installiert
+  PowerShell als Administrator oeffnen:
+    cd C:\ByblosCRM
+    .\msix\build_msix.ps1
+
+─────────────────────────────────────────────────────
+SCHRITT 6: Android APK
+─────────────────────────────────────────────────────
+  Voraussetzung: Android Studio oder Java 17 + Android SDK
+  
+  a) In android\app\src\main\java\...\MainActivity.java
+     die CRM_URL anpassen:
+     private static final String CRM_URL = "http://DEIN-SERVER:8501";
+  
+  b) android\build_apk.bat doppelklicken
+  
+  c) APK: android\app\build\outputs\apk\debug\app-debug.apk
+
+─────────────────────────────────────────────────────
+HAEUFIGE FEHLER & LOESUNGEN
+─────────────────────────────────────────────────────
+
+FEHLER: "No such file or directory: requirements.txt"
+LOESUNG: Projekt nach C:\ByblosCRM\ verschieben (keine
+         Sonderzeichen im Pfad)
+
+FEHLER: "Spec file not found"
+LOESUNG: Immer BUILD_WINDOWS.bat ausfuehren, nicht
+         build_exe.bat direkt aus anderem Ordner
+
+FEHLER: "To modify pip, please run..."
+LOESUNG: Normal, kein echter Fehler. Das Skript
+         verwendet python -m pip statt pip direkt.
+
+FEHLER: Antivirus blockiert EXE
+LOESUNG: Ausnahme im Antivirus fuer C:\ByblosCRM\ setzen.
+         PyInstaller-EXEs werden oft falsch erkannt.
+
+FEHLER: "Microsoft C++ Build Tools"
+LOESUNG: pytesseract aus requirements.txt entfernt.
+         OCR-Funktion nicht benoetigt fuer Grundbetrieb.
+
+─────────────────────────────────────────────────────
+SUPPORT
+─────────────────────────────────────────────────────
+Bei weiteren Problemen: Log-Ausgaben kopieren und
+dem Entwickler zusenden.
+=====================================================

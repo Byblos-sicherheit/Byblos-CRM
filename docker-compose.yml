@@ -1,0 +1,82 @@
+# ─────────────────────────────────────────────────────────────
+# Byblos CRM v2 – Docker Compose
+# ─────────────────────────────────────────────────────────────
+# Verwendung:
+#   docker compose up -d          # Starten
+#   docker compose down           # Stoppen
+#   docker compose logs -f        # Logs anzeigen
+#   docker compose pull && docker compose up -d  # Update
+# ─────────────────────────────────────────────────────────────
+
+services:
+  byblos-crm:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: byblos-crm:v2
+    container_name: byblos_crm
+    restart: unless-stopped
+    ports:
+      - "8501:8501"    # Streamlit-Port
+
+    # Persistente Daten (werden NICHT beim Update gelöscht)
+    volumes:
+      - byblos_db:/app/data              # Datenbank + Backups
+      - byblos_generated:/app/generated  # PDFs (Rechnungen, Berichte)
+      - byblos_imports:/app/imports      # Importierte Dateien
+      - byblos_assets:/app/assets        # Logo, Icons
+      - byblos_archive:/app/archive      # Archivierte Dokumente
+      - byblos_logs:/app/logs            # App-Logs
+
+    environment:
+      - TZ=Europe/Berlin
+      - BYBLOS_ENV=production
+
+    # Ressourcenlimits (anpassen je nach Server)
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 256M
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Optional: Nginx als Reverse-Proxy mit SSL
+  # nginx:
+  #   image: nginx:alpine
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/conf.d/default.conf
+  #     - /etc/letsencrypt:/etc/letsencrypt:ro
+  #   depends_on:
+  #     - byblos-crm
+  #   restart: unless-stopped
+
+volumes:
+  byblos_db:
+    name: byblos_crm_database
+  byblos_generated:
+    name: byblos_crm_pdfs
+  byblos_imports:
+    name: byblos_crm_imports
+  byblos_assets:
+    name: byblos_crm_assets
+  byblos_archive:
+    name: byblos_crm_archive
+  byblos_logs:
+    name: byblos_crm_logs

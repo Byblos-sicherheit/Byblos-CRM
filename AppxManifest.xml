@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  AppxManifest.xml – MSIX-Paketmanifest für Byblos CRM
+  =====================================================
+  Dieses Manifest beschreibt das MSIX-Paket für den Microsoft Store
+  und die Direktinstallation unter Windows 10/11.
+
+  Ersetze "CN=ByblosSicherheitsdienst" durch deinen tatsächlichen
+  Code-Signing-Zertifikat-Subject-Name, bevor du das Paket erstellst.
+
+  Verwendung:
+    1. EXE mit build_exe.bat erstellen (PyInstaller)
+    2. build_msix.ps1 ausführen  ODER
+       MakeAppx.exe pack /d PackageLayout /p ByblosCRM.msix
+    3. signtool sign /fd SHA256 /f cert.pfx /p Passwort ByblosCRM.msix
+-->
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  IgnorableNamespaces="uap rescap">
+
+  <Identity
+    Name="ByblosSicherheitsdienst.ByblosCRM"
+    Publisher="CN=ByblosSicherheitsdienst"
+    Version="2.0.0.0"
+    ProcessorArchitecture="x64" />
+
+  <Properties>
+    <DisplayName>Byblos CRM</DisplayName>
+    <PublisherDisplayName>Byblos Sicherheitsdienst &amp; Service</PublisherDisplayName>
+    <Logo>assets\StoreLogo.png</Logo>
+    <Description>CRM-System für Byblos Sicherheitsdienst: Kundenverwaltung, Rechnungen, Zeiterfassung, Field-Ops und mehr.</Description>
+  </Properties>
+
+  <Dependencies>
+    <TargetDeviceFamily
+      Name="Windows.Desktop"
+      MinVersion="10.0.17763.0"
+      MaxVersionTested="10.0.22621.0" />
+  </Dependencies>
+
+  <Resources>
+    <Resource Language="de-DE" />
+    <Resource Language="en-US" />
+  </Resources>
+
+  <Applications>
+    <Application
+      Id="ByblosCRM"
+      Executable="ByblosCRM\ByblosCRM.exe"
+      EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements
+        DisplayName="Byblos CRM"
+        Description="Byblos CRM – Betriebssoftware"
+        BackgroundColor="#0e1117"
+        Square150x150Logo="assets\Square150x150Logo.png"
+        Square44x44Logo="assets\Square44x44Logo.png">
+        <uap:DefaultTile
+          Wide310x150Logo="assets\Wide310x150Logo.png"
+          Square310x310Logo="assets\Square310x310Logo.png"
+          ShortName="Byblos CRM">
+          <uap:TileUpdate Recurrence="halfHour" UriTemplate="http://localhost:8501/" />
+        </uap:DefaultTile>
+        <uap:SplashScreen Image="assets\SplashScreen.png" BackgroundColor="#0e1117" />
+      </uap:VisualElements>
+    </Application>
+  </Applications>
+
+  <Capabilities>
+    <Capability Name="internetClient" />
+    <Capability Name="privateNetworkClientServer" />
+    <rescap:Capability Name="runFullTrust" />
+  </Capabilities>
+
+</Package>

@@ -1,0 +1,14 @@
+[
+  {
+    "text": "Rechnung Nr 100 Netto Betrag 500",
+    "category": "invoice"
+  },
+  {
+    "text": "Zahlung Bestellung Amazon Bürobedarf",
+    "category": "expense"
+  },
+  {
+    "text": "Kunde Mustermann GmbH Adresse Berlin",
+    "category": "customer"
+  }
+]
