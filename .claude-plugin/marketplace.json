@@ -1,0 +1,45 @@
+{
+  "name": "byblos-crm-plugins",
+  "owner": {
+    "name": "Byblos-sicherheit"
+  },
+  "metadata": {
+    "description": "Locally vendored Claude Code plugins for this project.",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "claude-ads",
+      "source": "./.claude/plugins/claude-ads",
+      "description": "Claude-first paid-media operations across Google, Meta, TikTok, LinkedIn and other ad platforms.",
+      "version": "2.0.1",
+      "author": { "name": "AgriciDaniel" },
+      "repository": "https://github.com/AgriciDaniel/claude-ads",
+      "license": "MIT"
+    },
+    {
+      "name": "taste-skill",
+      "source": "./.claude/plugins/taste-skill",
+      "description": "Frontend design taste skills (brutalist, minimalist, soft, redesign, stitch, and more).",
+      "version": "1.0.0",
+      "author": { "name": "leonxlnx" },
+      "repository": "https://github.com/leonxlnx/taste-skill",
+      "license": "MIT"
+    },
+    {
+      "name": "caveman",
+      "source": "./.claude/plugins/caveman",
+      "description": "Ultra-compressed communication mode to cut output tokens while keeping technical accuracy.",
+      "author": { "name": "Julius Brussee" },
+      "repository": "https://github.com/JuliusBrussee/caveman"
+    }
+  ],
+  "externalMarketplaces": [
+    {
+      "name": "ecc",
+      "description": "Everything Claude Code (ECC) – large cross-harness skills/hooks collection. Install from the official source only (README warns third-party re-uploads may be unsafe): add via `/plugin marketplace add affaan-m/ECC` then `/plugin install ecc@ecc`. A lightweight overview skill is vendored at .claude/skills/everything-claude-code/ so it shows up without a full install.",
+      "repository": "https://github.com/affaan-m/ECC",
+      "pluginSlug": "ecc@ecc"
+    }
+  ]
+}

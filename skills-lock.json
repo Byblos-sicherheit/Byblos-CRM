@@ -1,0 +1,55 @@
+{
+  "installed": [
+    {
+      "name": "claude-ads",
+      "type": "plugin",
+      "path": ".claude/plugins/claude-ads",
+      "source": "https://github.com/AgriciDaniel/claude-ads",
+      "version": "2.0.1",
+      "installMethod": "vendored (direct copy)"
+    },
+    {
+      "name": "taste-skill",
+      "type": "plugin",
+      "path": ".claude/plugins/taste-skill",
+      "source": "https://github.com/leonxlnx/taste-skill",
+      "version": "1.0.0",
+      "installMethod": "vendored (direct copy)"
+    },
+    {
+      "name": "caveman",
+      "type": "plugin",
+      "path": ".claude/plugins/caveman",
+      "source": "https://github.com/JuliusBrussee/caveman",
+      "installMethod": "vendored (direct copy)"
+    },
+    {
+      "name": "clone-website",
+      "type": "skill",
+      "path": ".claude/skills/clone-website",
+      "source": "https://github.com/JCodesMore/ai-website-cloner-template",
+      "installMethod": "vendored (SKILL.md only)"
+    },
+    {
+      "name": "everything-claude-code",
+      "type": "skill (overview only)",
+      "path": ".claude/skills/everything-claude-code",
+      "source": "https://github.com/affaan-m/ECC",
+      "installMethod": "vendored overview SKILL.md; full 889-skill collection intentionally NOT vendored, see CLAUDE.md"
+    }
+  ],
+  "excluded": [
+    {
+      "name": "fable-capability-orchestrator",
+      "reason": "Built from an unverifiable purported internal system-prompt document; not installed as a behavioral override."
+    },
+    {
+      "name": "SYXKGGOEGR (JetBrains license key)",
+      "reason": "Personal license credential, not a Claude Code artifact; excluded for security."
+    },
+    {
+      "name": "shttpsbackup (Simple HTTP Server Plus backup)",
+      "reason": "Contains a hashed password and SQLite database from an unrelated Android app; excluded for security."
+    }
+  ]
+}
