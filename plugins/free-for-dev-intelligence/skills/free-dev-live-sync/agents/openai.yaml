@@ -1,0 +1,4 @@
+interface:
+  display_name: "Free Dev Live Sync"
+  short_description: "Acquire and fingerprint current catalog snapshots"
+  brand_color: "#1677FF"
