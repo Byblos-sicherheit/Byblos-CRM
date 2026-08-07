@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "free-for-dev-intelligence": {
+      "command": "python3",
+      "args": [
+        "plugins/free-for-dev-intelligence/mcp_server/free_dev_mcp.py",
+        "--stdio"
+      ],
+      "env": {
+        "FREE_DEV_DATA_DIR": "plugins/free-for-dev-intelligence/data"
+      }
+    }
+  }
+}

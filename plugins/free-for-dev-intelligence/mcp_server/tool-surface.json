@@ -1,0 +1,17 @@
+{
+  "schema": "free-dev-mcp-tools/v1",
+  "version": "4.0.0",
+  "principles": [
+    "search and fetch follow the OpenAI read-only compatibility shape",
+    "hard constraints override weighted scores",
+    "catalog statements are discovery evidence, not authoritative provider proof",
+    "only render_comparison attaches the MCP Apps widget"
+  ],
+  "tools": [
+    "search", "fetch", "catalog_search", "route_query", "provider_profile",
+    "compare_services", "estimate_cost", "check_capacity", "compliance_filter",
+    "audit_risks", "design_architecture", "plan_migration", "compare_profiles",
+    "compare_catalog_snapshots", "export_results", "catalog_status", "refresh_catalog",
+    "render_comparison"
+  ]
+}
