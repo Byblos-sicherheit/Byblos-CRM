@@ -387,3 +387,409 @@ SQL (PostgreSQL) → Testing (Jest + Cypress) → Docker → CI/CD → System De
 | Testing | Vitest + Playwright | Jest + Cypress |
 | Deployment | Docker + GitHub Actions | Vercel/Railway |
 | Monitoring | Grafana + Sentry | Datadog |
+
+---
+
+## 11. KI / LLM-Integration
+
+### Grundlagen
+- **Large Language Models (LLMs)**: Sprachmodelle, die Text verstehen und generieren
+- **Tokens**: Einheit der Verarbeitung (~4 Zeichen = 1 Token), direkt verknüpft mit Kosten
+- **Context Window**: maximale Anzahl Tokens pro Anfrage (z.B. 200k bei Claude)
+- **Temperature**: 0 = deterministisch, 1 = kreativ/zufällig
+- **System Prompt**: Anweisung an das Modell, die das Verhalten definiert
+
+### Claude API / Anthropic SDK
+- **Messages API**: `messages.create({ model, max_tokens, messages: [{role, content}] })`
+- **Streaming**: `stream: true` für token-by-token Ausgabe (`stream.on('text', ...)`)
+- **Tool Use (Function Calling)**: Modell ruft definierte Funktionen auf, strukturierte Ausgabe
+- **Prompt Caching**: wiederholte System Prompts cachen → 90% Kostenreduktion
+- **Modelle**: Claude Haiku (schnell/günstig), Sonnet (ausgewogen), Opus (leistungsstark)
+
+### Prompt Engineering
+- **Zero-Shot**: direkte Aufgabe ohne Beispiele
+- **Few-Shot**: 2–5 Beispiele im Prompt für konsistenteres Verhalten
+- **Chain-of-Thought (CoT)**: "Denke Schritt für Schritt" → bessere Reasoning-Qualität
+- **Structured Output**: JSON-Format erzwingen via Tool Use oder `response_format`
+- **System + User + Assistant**: korrekte Rollenstruktur für Multi-Turn-Dialoge
+- Anti-Patterns: zu langer Prompt ohne Struktur, widersprüchliche Anweisungen
+
+### RAG (Retrieval-Augmented Generation)
+- **Embeddings**: Text → Vektor (numerische Darstellung der Bedeutung)
+- **Vektordatenbanken**: pgvector (PostgreSQL), Pinecone, Weaviate, Qdrant
+- RAG-Pipeline: Dokument → Chunks → Embeddings → DB → Query → relevante Chunks → LLM
+- **Chunking-Strategien**: Fixed-Size, Sentence-Splitting, Semantic Chunking
+- **Reranking**: zweite Stufe zur Relevanz-Verbesserung (Cohere Rerank)
+- Anwendungsfälle: Chatbots auf eigenen Daten, Dokumentensuche, Q&A über PDFs
+
+### AI SDK & Frameworks
+- **Vercel AI SDK**: `useChat`, `useCompletion` für React/Next.js, Streaming out-of-the-box
+- **LangChain.js**: Chains, Agents, Memory, Tool-Integration
+- **LlamaIndex**: spezialisiert auf Dokumenten-Indexierung und RAG
+- **Mastra**: TypeScript-natives AI-Agent-Framework (Workflows, Memory, Tools)
+
+### AI-Agents
+- **Tool-Calling Loop**: LLM → Tool ausführen → Ergebnis zurück → LLM → ...
+- **Multi-Agent-Systeme**: Orchestrator-Agent delegiert an Spezialist-Agenten
+- **Memory-Typen**: In-Context (Conversation History), External (DB), Semantic (Embeddings)
+- **Human-in-the-Loop**: Checkpoints wo Menschen bestätigen müssen
+
+---
+
+## 12. Payment-Integration
+
+### Stripe (Standard)
+- **Payment Intent**: serverseitig erstellen, clientseitig bestätigen (PCI-sicher)
+- **Stripe Elements / Stripe.js**: vorgefertigte UI-Komponenten für Karteneingabe
+- **Webhooks**: `payment_intent.succeeded`, `invoice.payment_failed` → eigene DB aktualisieren
+- **Subscriptions**: `stripe.subscriptions.create()`, Billing Cycles, Proration
+- **Refunds**: `stripe.refunds.create({ payment_intent: '...' })`
+- **Stripe Checkout**: hosted Payment Page ohne eigene UI
+- **Stripe Connect**: Marketplace-Zahlungen, Split Payments
+
+### Sicherheit & Compliance
+- **PCI-DSS**: Kartendaten NIE selbst speichern oder loggen
+- Stripe übernimmt PCI-Compliance wenn Stripe.js korrekt verwendet
+- Webhook-Signaturen verifizieren: `stripe.webhooks.constructEvent()`
+- **Idempotency Keys**: doppelte Zahlungsversuche sicher abfangen
+
+### Europäische Besonderheiten
+- **SEPA-Lastschrift**: für DE/AT/CH-Kunden
+- **Mollie / PayPal**: Alternativen mit lokalen Zahlungsmethoden (iDEAL, Sofort)
+- **3D Secure (3DS2)**: EU-Pflicht (SCA), Stripe handhabt das automatisch
+
+---
+
+## 13. E-Mail
+
+### Transaktions-E-Mails
+- **Resend**: moderne API, React Email Unterstützung, einfache Integration
+- **SendGrid**: Marktführer, starkes Analytics-Dashboard
+- **Nodemailer**: direkt via SMTP, gut für self-hosted
+- **Mailgun / Postmark**: zuverlässige Zustellung, gute Logs
+
+### E-Mail-Templates
+- **React Email**: E-Mails als React-Komponenten schreiben, dann rendern
+- **MJML**: responsives E-Mail-Markup, kompiliert zu HTML
+- Inline-CSS ist Pflicht (E-Mail-Clients ignorieren externe Stylesheets)
+- Dark Mode in E-Mails: `@media (prefers-color-scheme: dark)` (nur teils unterstützt)
+
+### Zustellbarkeit (Deliverability)
+- **SPF**: autorisierte Mail-Server im DNS definieren
+- **DKIM**: kryptografische Signatur jeder E-Mail
+- **DMARC**: Policy was bei SPF/DKIM-Fehlschlag passiert (reject/quarantine/none)
+- Eigene Domain verwenden, niemals `@gmail.com` für transaktionale Mails
+- Bounce-Handling und Unsubscribe-Links sind Pflicht (CAN-SPAM, DSGVO)
+
+---
+
+## 14. Suche (Search)
+
+### Volltextsuche
+- **PostgreSQL Full-Text Search**: `tsvector`, `tsquery`, `@@`-Operator, `ts_rank`
+- **Elasticsearch**: mächtig, horizontale Skalierung, komplexe Aggregationen
+- **OpenSearch**: AWS-Variante von Elasticsearch (open source)
+
+### SaaS-Suchlösungen
+- **Algolia**: sehr schnell (< 100ms), InstantSearch UI-Bibliothek, einfach zu integrieren
+- **Typesense**: open source, selbst gehostet, einfacher als Elasticsearch
+- **Meilisearch**: open source, typo-tolerant, Deutsch-Unterstützung
+
+### Suchmuster
+- **Fuzzy Search**: Tippfehler tolerieren (`"helo" → "hello"`)
+- **Faceted Search**: Filterkategorien (Preis, Kategorie, Bewertung)
+- **Autovervollständigung**: Prefix-Search, Suggest-API
+- **Semantic Search**: Embeddings-basiert, findet Bedeutung statt Stichwörter
+- **Hybrid Search**: Keyword + Semantic kombinieren für beste Ergebnisse
+
+---
+
+## 15. File Upload & Medien
+
+### Objekt-Speicher
+- **AWS S3**: Standard, günstig, nahezu unbegrenzt
+- **Cloudflare R2**: S3-kompatibel, kein Egress-Preis (günstiger für Downloads)
+- **Supabase Storage**: S3 dahinter, einfache SDK-Integration
+- **Uploadthing**: Next.js-optimiert, typsicher, einfach
+
+### Upload-Strategie
+- **Presigned URLs**: Browser lädt direkt zu S3, Server nie als Zwischenspeicher
+- Dateivalidierung: MIME-Type, Dateigröße, Magic Bytes (echten Typ prüfen)
+- Virus-Scanning: ClamAV oder SaaS (z.B. Cloudmersive) nach Upload
+- Multipart Upload für große Dateien (> 100 MB)
+
+### Bild-Optimierung
+- **Formate**: WebP (80% kleiner als JPEG), AVIF (noch kleiner, breite Unterstützung 2024)
+- `<picture>` + `srcset` für responsive Bilder
+- **Next.js `<Image>`**: automatische Optimierung, Lazy Loading, Blur Placeholder
+- **Sharp**: serverseitige Bildbearbeitung (Resize, Crop, Compress)
+- CDN mit Image Transformation: Cloudflare Images, Imgix, Cloudinary
+
+---
+
+## 16. Background Jobs & Scheduling
+
+### Job Queues
+- **BullMQ** (Redis-basiert): zuverlässig, Retry-Logik, Prioritäten, Rate Limiting, Cron
+- **pg-boss** (PostgreSQL-basiert): kein Redis nötig, ACID-Garantien
+- **Inngest**: cloud-native Event-driven Jobs, einfach lokal zu testen
+- **Trigger.dev**: TypeScript-native, Background Jobs als Code
+
+### Wann Jobs statt HTTP?
+- E-Mail versenden, PDF generieren, externe API aufrufen
+- Alles was > 30 Sekunden dauert (HTTP Timeout-Grenze)
+- Retry bei Fehlern ist Pflicht (idempotente Jobs schreiben)
+
+### Cron Jobs
+- Syntax: `* * * * *` (Minute Stunde Tag Monat Wochentag)
+- Beispiele: `0 8 * * 1-5` (Mo–Fr 8 Uhr), `0 0 1 * *` (Monatserster)
+- Monitoring: Dead Man's Snitch, Healthchecks.io — Alarm wenn Cron nicht läuft
+
+---
+
+## 17. Headless CMS
+
+| CMS | Hosting | Besonderheit |
+|-----|---------|--------------|
+| **Strapi** | Self-hosted | flexibel, REST + GraphQL, Plugin-Ökosystem |
+| **Payload CMS** | Self-hosted | TypeScript-nativ, DB direkt in App |
+| **Directus** | Self-hosted | wirkt wie Admin-UI über jede DB |
+| **Sanity** | Cloud | Real-time, GROQ-Abfragesprache, strukturiert |
+| **Contentful** | Cloud | Enterprise, stark typisiert, viele Integrationen |
+| **Storyblok** | Cloud | Visual Editor, gut für Marketing-Teams |
+
+- **Content Delivery API** vs. **Management API**: lesen vs. schreiben
+- **Webhooks**: bei Content-Änderung Rebuild triggern (ISR in Next.js)
+- **Preview Mode**: unveröffentlichten Content im Frontend anzeigen
+
+---
+
+## 18. Analytics & Feature Flags
+
+### Web Analytics
+- **PostHog**: open source, Session Recordings, Funnels, Feature Flags, self-hostbar
+- **Plausible**: DSGVO-konform, kein Cookie-Banner nötig, leichtgewichtig
+- **Mixpanel**: Event-basiert, starke Nutzer-Journey-Analyse
+- **Google Analytics 4**: kostenlos, DSGVO-kritisch ohne Consent-Management
+
+### Feature Flags
+- Deployment von Feature-Aktivierung entkoppeln
+- **LaunchDarkly**: Enterprise, SDK für alle Sprachen
+- **GrowthBook**: open source, A/B Testing integriert
+- **Unleash**: open source, self-hostbar
+- Patterns: `if (featureFlag('new-checkout')) { ... }`, Rollout-Prozentsätze
+
+### A/B Testing
+- Kontrollgruppe (A) vs. Variante (B), statistisch signifikante Ergebnisse abwarten
+- Server-side vs. Client-side Testing (Server verhindert Layout Shifts)
+- Metriken definieren bevor Test startet (Conversion Rate, Klickrate)
+
+---
+
+## 19. Barrierefreiheit (a11y) – Vertiefung
+
+### Standards & Gesetze
+- **WCAG 2.2**: Web Content Accessibility Guidelines
+  - Level A: Mindestanforderungen
+  - Level AA: gesetzliche Pflicht (EU Web Accessibility Directive, BFSG in DE ab 2025)
+  - Level AAA: optimal, nicht immer erreichbar
+- **ARIA**: `role`, `aria-label`, `aria-describedby`, `aria-expanded`, `aria-live`
+
+### Praktische Umsetzung
+- **Tastaturnavigation**: alle interaktiven Elemente via Tab erreichbar, sichtbarer Focus-Ring
+- **Focus Management**: bei Modals Focus sperren (`focus-trap`), bei Navigation Focus setzen
+- **Skip Links**: "Zum Hauptinhalt springen" als erster Link
+- **Semantisches HTML** schlägt ARIA: `<button>` > `<div role="button">`
+- **Kontrastverhältnis**: min. 4.5:1 (Text), 3:1 (großer Text, UI-Komponenten)
+- `prefers-reduced-motion`: Animationen für vestibulär sensible Nutzer deaktivieren
+
+### Testing-Tools
+- **axe-core** / **axe DevTools**: automatische a11y-Prüfung (findet ~30% der Probleme)
+- **Lighthouse**: a11y-Score in Chrome DevTools
+- **NVDA** (Windows) / **VoiceOver** (Mac/iOS): manuelle Screenreader-Tests
+- **Colour Contrast Analyser**: Kontrast prüfen
+- Automatisiert: `jest-axe`, `cypress-axe`
+
+---
+
+## 20. Observability – Die 3 Säulen (Vertiefung)
+
+### Logs
+- **Strukturiertes Logging**: JSON statt Freitext → maschinell auswertbar
+- **Log-Level**: `debug` (Entwicklung), `info` (normal), `warn` (Achtung), `error` (Problem)
+- **Korrelations-IDs**: Request-ID durch alle Services mitschleppen (`X-Correlation-ID`)
+- **Log-Aggregation**: Loki + Grafana, Datadog Logs, AWS CloudWatch
+- Was loggen? Wer, Was, Wann, Ergebnis — NIE Passwörter oder PII
+
+### Metrics
+- **Prometheus**: Pull-basiert, Zeitreihendaten, `Counter`, `Gauge`, `Histogram`
+- **Grafana**: Dashboards für Prometheus-Daten
+- **Wichtige Metriken**: Request Rate, Error Rate, Latenz (p50/p95/p99), CPU, Memory
+- **RED-Methode**: Rate, Errors, Duration — für Services
+- **USE-Methode**: Utilization, Saturation, Errors — für Ressourcen
+
+### Traces
+- **Distributed Tracing**: Anfrage durch mehrere Services verfolgen
+- **OpenTelemetry**: offener Standard, Vendor-neutral (einmal instrumentieren, überall exportieren)
+- **Jaeger / Zipkin**: open source Trace-Backends
+- **Spans**: einzelne Operation innerhalb eines Traces, mit Start/End-Zeit
+- Anwendungsfall: "Warum dauert diese API-Anfrage 800ms?" → Trace zeigt wo
+
+---
+
+## 21. Sicherheit – Vertiefung
+
+### OWASP Top 10 (2021)
+1. **Broken Access Control**: fehlende Autorisierungsprüfungen
+2. **Cryptographic Failures**: schwache Verschlüsselung, HTTP statt HTTPS
+3. **Injection**: SQL, NoSQL, Command Injection durch unsanitisierte Eingaben
+4. **Insecure Design**: fehlende Sicherheitskonzepte in der Architektur
+5. **Security Misconfiguration**: Default-Passwörter, offene Cloud-Buckets
+6. **Vulnerable Components**: veraltete Dependencies mit bekannten CVEs
+7. **Authentication Failures**: schwache Passwörter, fehlende MFA, Session-Probleme
+8. **Software & Data Integrity**: CI/CD ohne Verifikation, unsichere Deserializierung
+9. **Logging & Monitoring Failures**: Angriffe nicht erkennen
+10. **SSRF**: Server macht Anfragen an interne Systeme durch Nutzer-Input
+
+### Praktische Gegenmaßnahmen
+- Input Validation: Whitelist statt Blacklist, auf dem Server validieren (nicht nur Client)
+- Parameterized Queries (Prepared Statements): SQL Injection verhindern
+- `helmet.js`: setzt wichtige HTTP-Security-Header automatisch
+- Content Security Policy (CSP): erlaubte Script-Quellen definieren
+- `npm audit --fix`, Dependabot, Snyk: automatische Dependency-Sicherheit
+- Secrets niemals im Code oder Git: `.env`, Vault, GitHub Secrets
+- **CSRF-Tokens**: bei State-ändernden Formularen (oder SameSite=Strict Cookies)
+- **Rate Limiting**: Login-Versuche begrenzen (z.B. 5 pro Minute)
+
+### Sicherheits-Tools
+- **OWASP ZAP**: automatischer Vulnerability-Scanner
+- **Burp Suite**: professionelles Pentesting-Tool
+- **Trivy**: Container-Image auf Schwachstellen scannen
+- **GitLeaks**: versehentliche Secrets in Git-History finden
+
+---
+
+## 22. Mobile & Cross-Platform
+
+### React Native
+- JavaScript/TypeScript → native iOS & Android Apps
+- **Expo**: vereinfachtes Setup, OTA-Updates, `expo-router`
+- Kernkomponenten: `View`, `Text`, `ScrollView`, `FlatList`, `TouchableOpacity`
+- Navigation: React Navigation (Stack, Tab, Drawer)
+- Native Module: Kamera, GPS, Push-Notifications, Biometrie
+
+### Capacitor (Ionic)
+- Web-App (HTML/CSS/JS) → native App über WebView
+- Zugriff auf native APIs: Kamera, Dateisystem, Gerätesensoren
+- Gut wenn man bestehende Web-App zur nativen App machen will
+
+### Electron (Desktop)
+- Web-Technologien → Desktop-App (Windows, Mac, Linux)
+- Chromium + Node.js in einem Paket
+- Beispiele: VS Code, Discord, Figma (Desktop), Slack
+- Nachteil: große Bundle-Größe (~150MB)
+
+### Tauri (Desktop — modern)
+- Rust-basiert, nutzt System-WebView statt Chromium → viel kleiner (~10MB)
+- Besser für Sicherheit und Performance als Electron
+
+---
+
+## 23. Web Scraping & Automatisierung
+
+### Tools
+- **Puppeteer**: Chrome-Steuerung via Node.js, Google-Projekt
+- **Playwright**: moderner, multi-browser (Chrome, Firefox, Safari), Microsoft-Projekt
+- **Cheerio**: HTML parsen wie jQuery — nur für statische Seiten
+- **Axios + JSDOM**: leichtgewichtig für einfache Fälle
+
+### Techniken
+- **Headless Mode**: Browser ohne GUI (`--headless`)
+- **Selektoren**: CSS-Selektoren, XPath, `data-*`-Attribute bevorzugen
+- **Warten auf Elemente**: `waitForSelector`, `waitForNetworkIdle`
+- **Anti-Bot-Umgehung**: User-Agent setzen, Delays, Proxies (mit Erlaubnis!)
+- **Pagination**: nächste Seite klicken oder URL-Parameter erhöhen
+
+### Rechtliches & Ethik
+- `robots.txt` immer prüfen und respektieren
+- Terms of Service beachten — Scraping kann verboten sein
+- Rate Limiting: Server nicht überlasten (1 Request pro Sekunde als Faustregel)
+- Persönliche Daten: DSGVO beachten beim Speichern gescrapeter Daten
+
+---
+
+## 24. Datenstrukturen & Algorithmen (Vertiefung)
+
+### Wichtige Algorithmen für Web-Entwickler
+- **Debounce & Throttle**: Sucheingabe-Optimierung, Scroll-Events
+- **Memoization**: `useMemo`, `React.memo`, manuelle Cache-Maps
+- **Binary Search**: O(log n) Suche in sortierten Arrays
+- **Diff-Algorithmus**: wie React den Virtual DOM vergleicht (Myers-Diff)
+- **Trie (Prefix-Tree)**: effiziente Autovervollständigung
+- **LRU-Cache**: Least Recently Used — Cache-Verdrängungsstrategie
+
+### Komplexitätsanalyse (Praxis)
+```
+O(1)      → HashMap lookup, Array-Zugriff per Index
+O(log n)  → Binäre Suche, Balanced BST
+O(n)      → Array durchlaufen, lineare Suche
+O(n log n)→ Merge Sort, Quick Sort (avg)
+O(n²)     → verschachtelte Schleifen (vermeiden bei großen Daten!)
+```
+
+### Häufige Interview-Aufgaben (Konzepte)
+- Two Pointers: Array-Probleme in O(n) statt O(n²) lösen
+- Sliding Window: maximale Teilfolge finden
+- Rekursion + Memoization → Dynamic Programming
+- Graph-Traversal: BFS (Level-Order) vs. DFS (Tiefe-zuerst)
+
+---
+
+## 25. Continuous Learning (Wie aktuell bleiben?)
+
+### Ressourcen-Empfehlungen
+- **Dokumentationen**: MDN (Web), Node.js Docs, React Docs (react.dev)
+- **Newsletter**: JavaScript Weekly, Bytes.dev, Node Weekly, CSS-Tricks
+- **Blogs**: Kent C. Dodds, Josh W. Comeau, Dan Abramov, Addy Osmani
+- **YouTube**: Fireship, Theo (t3.gg), Jack Herrington, Traversy Media
+- **Podcasts**: Syntax.fm, JS Party, The Changelog
+- **Plattformen**: Frontend Masters, Egghead.io, Total TypeScript
+
+### Lernstrategien
+- **Learning by Doing**: echte Projekte bauen statt nur Tutorials konsumieren
+- **Teach to Learn**: Blog-Posts schreiben, andere unterrichten
+- **Code Reading**: Open-Source-Code lesen (React, Next.js, Prisma Sourcecode)
+- **Spaced Repetition**: Anki-Karten für Konzepte die man vergisst
+- Konferenzen: JSConf, VueConf, React Summit, NodeConf
+
+---
+
+## Gesamtübersicht aller Bereiche
+
+| # | Bereich | Status |
+|---|---------|--------|
+| 1 | Frontend (HTML, CSS, JS, TS, Components) | ✅ |
+| 2 | Backend (Server, Routing, Auth, APIs) | ✅ |
+| 3 | Datenbanken (SQL, NoSQL, ORM, Queries) | ✅ |
+| 4 | Software-Engineering (Patterns, Testing, Git) | ✅ |
+| 5 | Progressive Web Apps (PWA) | ✅ |
+| 6 | Echtzeit & WebRTC | ✅ |
+| 7 | Serverless & Edge Computing | ✅ |
+| 8 | Internationalisierung (i18n/l10n) | ✅ |
+| 9 | Deployment (Docker, K8s, CI/CD) | ✅ |
+| 10 | Datenstrukturen & Algorithmen | ✅ |
+| 11 | KI / LLM-Integration | ✅ |
+| 12 | Payment-Integration (Stripe) | ✅ |
+| 13 | E-Mail (Transaktional, Deliverability) | ✅ |
+| 14 | Suche (Elasticsearch, Algolia, Typesense) | ✅ |
+| 15 | File Upload & Medien | ✅ |
+| 16 | Background Jobs & Scheduling | ✅ |
+| 17 | Headless CMS | ✅ |
+| 18 | Analytics & Feature Flags | ✅ |
+| 19 | Barrierefreiheit (a11y) | ✅ |
+| 20 | Observability (Logs, Metrics, Traces) | ✅ |
+| 21 | Sicherheit (OWASP Top 10) | ✅ |
+| 22 | Mobile & Cross-Platform | ✅ |
+| 23 | Web Scraping & Automatisierung | ✅ |
+| 24 | Algorithmen (Vertiefung) | ✅ |
+| 25 | Continuous Learning | ✅ |
