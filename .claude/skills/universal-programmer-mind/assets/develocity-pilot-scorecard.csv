@@ -1,0 +1,13 @@
+category,weight,mandatory_gate,baseline,target,result,score_0_to_5,evidence,owner,status
+Strategic fit,10,false,,,,,,,
+Toolchain coverage,10,true,,,,,,,
+Context and observability,10,false,,,,,,,
+Acceleration effectiveness,12,false,,,,,,,
+Test-signal reliability,10,false,,,,,,,
+Governance and provenance,10,false,,,,,,,
+Security and data controls,12,true,,,,,,,
+AI-agent integration,6,false,,,,,,,
+Operational burden,6,false,,,,,,,
+Developer experience,5,false,,,,,,,
+Financial case,6,false,,,,,,,
+Vendor and exit risk,3,false,,,,,,,
