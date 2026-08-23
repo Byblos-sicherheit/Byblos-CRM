@@ -1,0 +1,15 @@
+.DS_Store
+.idea/
+*.iml
+.env
+node_modules/
+android-app/.gradle/
+android-app/local.properties
+android-app/app/build/
+android-app/build/
+android-app/*.jks
+android-app/*.keystore
+agent-backend/.venv/
+agent-backend/.runtime/
+agent-backend/__pycache__/
+agent-backend/**/*.pyc
