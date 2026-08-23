@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Byblos AI</string>
+    <string name="chat_title">Byblos AI</string>
+    <string name="delete_conversation">Unterhaltung löschen</string>
+    <string name="empty_state">Schreiben Sie eine Frage, um die Unterhaltung zu starten. Senden Sie keine Passwörter oder sensiblen personenbezogenen Daten.</string>
+    <string name="message_label">Nachricht</string>
+    <string name="send_message">Senden</string>
+    <string name="cancel_generation">Antwort abbrechen</string>
+    <string name="generating_answer">Antwort wird erstellt…</string>
+    <string name="delivery_failed">Senden fehlgeschlagen</string>
+    <string name="generation_cancelled">Antwort abgebrochen</string>
+    <string name="error_send_failed">Die Nachricht konnte nicht verarbeitet werden. Prüfen Sie die Verbindung und versuchen Sie es erneut.</string>
+</resources>
