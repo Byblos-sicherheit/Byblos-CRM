@@ -1,0 +1,5 @@
+.env
+config/users.caddy
+backups/
+*.log
+*.zip

@@ -1,0 +1,70 @@
+{
+	email {$ACME_EMAIL}
+	admin off
+}
+
+{$DOMAIN} {
+	log {
+		output file /var/log/caddy/access.log {
+			roll_size 25MiB
+			roll_keep 10
+			roll_keep_for 720h
+		}
+		format json
+	}
+
+	route {
+		handle /healthz {
+			header Content-Type "text/plain; charset=utf-8"
+			respond "ok" 200
+		}
+
+		basic_auth bcrypt "Byblos Server" {
+			import users.caddy
+		}
+
+		header {
+			-Server
+			Strict-Transport-Security "max-age=31536000"
+			X-Content-Type-Options "nosniff"
+			X-Frame-Options "SAMEORIGIN"
+			Referrer-Policy "strict-origin-when-cross-origin"
+			Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		}
+
+		redir /crm /crm/ 308
+		redir /wks /wks/ 308
+		redir /files /files/ 308
+
+		handle_path /crm/* {
+			reverse_proxy {$CRM_UPSTREAM} {
+				header_up -Authorization
+				header_up X-Authenticated-User {http.auth.user.id}
+				header_up X-Forwarded-Prefix /crm
+			}
+		}
+
+		handle_path /wks/* {
+			reverse_proxy {$WKS_UPSTREAM} {
+				header_up -Authorization
+				header_up X-Authenticated-User {http.auth.user.id}
+				header_up X-Forwarded-Prefix /wks
+			}
+		}
+
+		handle_path /files/* {
+			reverse_proxy {$FILES_UPSTREAM} {
+				header_up -Authorization
+				header_up X-Authenticated-User {http.auth.user.id}
+				header_up X-Forwarded-Prefix /files
+			}
+		}
+
+		handle {
+			reverse_proxy {$LEXAI_UPSTREAM} {
+				header_up -Authorization
+				header_up X-Authenticated-User {http.auth.user.id}
+			}
+		}
+	}
+}

@@ -1,0 +1,44 @@
+#!/bin/sh
+set -eu
+
+VERSION="9.3.1"
+SHA256="b266d5ff6b90eada6dc3b20cb090e3731302e553a27c5d3e4df1f0d76beaff06"
+GRADLE_HOME_BASE="${GRADLE_USER_HOME:-$HOME/.gradle}/byblos-bootstrap"
+INSTALL_DIR="$GRADLE_HOME_BASE/gradle-$VERSION"
+ZIP_PATH="$GRADLE_HOME_BASE/gradle-$VERSION-bin.zip"
+URL="https://services.gradle.org/distributions/gradle-$VERSION-bin.zip"
+
+verify_sha256() {
+  if command -v sha256sum >/dev/null 2>&1; then
+    printf '%s  %s\n' "$SHA256" "$ZIP_PATH" | sha256sum -c - >/dev/null
+  elif command -v shasum >/dev/null 2>&1; then
+    actual="$(shasum -a 256 "$ZIP_PATH" | awk '{print $1}')"
+    [ "$actual" = "$SHA256" ]
+  else
+    echo "No SHA-256 verification tool found (sha256sum or shasum)." >&2
+    exit 1
+  fi
+}
+
+if [ ! -x "$INSTALL_DIR/bin/gradle" ]; then
+  mkdir -p "$GRADLE_HOME_BASE"
+  if [ ! -f "$ZIP_PATH" ]; then
+    if command -v curl >/dev/null 2>&1; then
+      curl -fL "$URL" -o "$ZIP_PATH"
+    elif command -v wget >/dev/null 2>&1; then
+      wget "$URL" -O "$ZIP_PATH"
+    else
+      echo "curl or wget is required to download Gradle." >&2
+      exit 1
+    fi
+  fi
+  verify_sha256
+  rm -rf "$INSTALL_DIR"
+  if ! command -v unzip >/dev/null 2>&1; then
+    echo "unzip is required to install Gradle." >&2
+    exit 1
+  fi
+  unzip -q "$ZIP_PATH" -d "$GRADLE_HOME_BASE"
+fi
+
+exec "$INSTALL_DIR/bin/gradle" "$@"
