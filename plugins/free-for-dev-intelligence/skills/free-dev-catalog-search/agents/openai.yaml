@@ -1,0 +1,4 @@
+interface:
+  display_name: "Free Dev Catalog Search"
+  short_description: "Search and shortlist current free developer services"
+  brand_color: "#1677FF"

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Free Dev Query Router"
+  short_description: "Route complex free-tier requests"
+  brand_color: "#1677FF"
