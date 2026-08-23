@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Byblos AI</string>
+    <string name="chat_title">Byblos AI</string>
+    <string name="delete_conversation">حذف المحادثة</string>
+    <string name="empty_state">اكتب سؤالك لبدء المحادثة. لا ترسل كلمات مرور أو بيانات شخصية حساسة.</string>
+    <string name="message_label">الرسالة</string>
+    <string name="send_message">إرسال</string>
+    <string name="cancel_generation">إيقاف الإجابة</string>
+    <string name="generating_answer">جارٍ إنشاء الإجابة…</string>
+    <string name="delivery_failed">فشل الإرسال</string>
+    <string name="generation_cancelled">تم إيقاف الإجابة</string>
+    <string name="error_send_failed">تعذرت معالجة الرسالة. تحقق من الاتصال ثم حاول مجددًا.</string>
+</resources>

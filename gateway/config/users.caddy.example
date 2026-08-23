@@ -1,0 +1,2 @@
+# Beispielstruktur – NICHT als produktiven Zugang verwenden:
+# benutzername $2a$14$HIER_STEHT_DER_VON_CADDY_ERZEUGTE_BCRYPT_HASH
