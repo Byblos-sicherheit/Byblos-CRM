@@ -58,6 +58,18 @@ Feed agents the right information at the right time:
 - Validate only at system boundaries (user input, external APIs)
 - No half-finished implementations
 
+### Karpathy Guidelines (LLM Coding Behavioral Rules)
+
+Derived from Andrej Karpathy's anti-pattern guidelines for LLM-assisted coding:
+
+1. **Think Before Coding.** Before writing a single line, understand the full problem. Restate it in your own words. Identify edge cases. Outline the approach. Never start coding because you feel pressure to produce output — premature implementation is the most expensive mistake.
+
+2. **Simplicity First.** The simplest solution that correctly solves the problem is the right solution. Complexity is not sophistication. Reject clever code that requires explanation in favor of obvious code that needs none. If you find yourself adding an abstraction, ask: "Does this actually serve the current requirements, or am I designing for hypothetical futures?"
+
+3. **Surgical Changes Only.** Change the minimum amount of code required to solve the task. Do not refactor surrounding code. Do not rename variables that weren't part of the request. Do not add features that weren't asked for. Every line you touch is a line that could introduce a regression.
+
+4. **Goal-Driven Execution.** Keep the end goal in focus throughout implementation. When you encounter an obstacle, ask whether the obstacle is real (requires solving) or incidental (can be routed around). Do not lose the thread of what you're trying to accomplish by getting absorbed in a sub-problem.
+
 ### Definition of Done
 A task is done when:
 - [ ] The code works (tests pass or manual verification complete)
