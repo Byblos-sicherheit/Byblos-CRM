@@ -1,7 +1,7 @@
 {
   "name": "byblos-universal-suite",
-  "description": "Byblos Universal Skill Suite — a merged collection of 15 skill domains covering engineering, infrastructure, free-services, animation, UI design, NoSQL databases, security auditing, marketing, browser testing, IT analysis, SEO, and meta-orchestration. Combines patterns from agent-skills, network-isp-systems-engineer, free-for-dev, text-to-lottie, harness, task-observer, byblos-interface-design, nosql-engineering, security-audit, marketing-skills, playwright-cli, technical-it-analyst, and claude-seo into one cohesive Claude Code plugin.",
-  "version": "2.0.0",
+  "description": "Byblos Universal Skill Suite — a merged collection of 16 skill domains covering engineering, infrastructure, free-services, animation, UI design, UI styling (shadcn/Tailwind), NoSQL databases, security auditing, marketing, browser testing, IT analysis, SEO, and meta-orchestration.",
+  "version": "2.1.0",
   "author": {
     "name": "Byblos Sicherheit & Facility Services",
     "url": "https://github.com/byblos-sicherheit"
@@ -44,6 +44,7 @@
     "marketing",
     "playwright",
     "technical-it-analyst",
-    "seo"
+    "seo",
+    "ui-styling"
   ]
 }

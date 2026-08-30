@@ -2,7 +2,7 @@
 
 ## Active Skills
 
-This repository uses the **Byblos Universal Skill Suite** — a merged collection of 15 skill domains.
+This repository uses the **Byblos Universal Skill Suite** — a merged collection of 16 skill domains.
 
 ### Skill Triggers
 
@@ -21,6 +21,7 @@ This repository uses the **Byblos Universal Skill Suite** — a merged collectio
 | "security audit", "pentest", "vulnerability", "OWASP", "threat model", "hardening", "CVE", "exploit", "CTF", "injection", "XSS", "audit code" | `/security-audit` |
 | "marketing plan", "copywriting", "email campaign", "ad creative", "SEO strategy", "growth", "landing page", "lead magnet", "referral program", "social media", "PR", "CRO", "onboarding flow", "pricing strategy" | `/marketing` |
 | "playwright", "e2e test", "browser test", "automate browser", "end-to-end", "test this flow", "visual regression", "page object" | `/playwright` |
+| "shadcn", "tailwind", "ui component", "dialog", "form", "data table", "dark mode", "theme", "responsive layout", "component library", "radix", "shadcn/ui" | `/ui-styling` |
 | "IT analysis", "technical audit", "port table", "DNS config", "network diagram", "architecture diagram", "IT screenshot", "infographic analysis", "troubleshooting guide", "study notes" | `/technical-it-analyst` |
 | "SEO audit", "keyword research", "Core Web Vitals", "schema markup", "local SEO", "backlink", "sitemap", "meta tags", "programmatic SEO", "search ranking" | `/seo` |
 

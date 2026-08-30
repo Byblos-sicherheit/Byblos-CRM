@@ -84,6 +84,8 @@ Load only references relevant to the current task:
 | Byblos admin and service-business workflows | `references/business-apps.md` |
 | Whole-screen or whole-flow audit | `references/interface-review.md` |
 | Completion checklist before declaring done | `references/completion-criteria.md` |
+| UX rules priority table (10 categories, pre-delivery checklist) | `references/ux-rules-priority.md` |
+| 100+ famous design systems (Claude, Vercel, Stripe, Linear…) | `references/famous-design-systems.md` |
 
 ## 6. Anti-Generic Design Gate
 
