@@ -99,6 +99,14 @@ description: Search engine optimization strategy, technical SEO, content SEO, lo
 | FID / INP (Interaction to Next Paint) | < 200ms | Break up long tasks, defer non-critical JS |
 | CLS (Cumulative Layout Shift) | < 0.1 | Set explicit width/height on images and embeds, avoid dynamic content injection above fold |
 
+## Reference Map (Lazy Load)
+
+Load only when relevant:
+
+| Scope | Reference |
+| --- | --- |
+| WordPress + Google services integration | `references/google-site-kit.md` |
+
 ## MCP Extensions (Optional — requires API keys)
 
 These extensions unlock live data from external SEO tools. Each requires the corresponding MCP server configured with a valid API key:

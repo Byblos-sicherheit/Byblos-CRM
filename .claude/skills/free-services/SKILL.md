@@ -63,6 +63,13 @@ Steps for provider migration:
 5. Generate migration checklist with validation steps
 6. Estimate downtime / cutover risk
 
+## Reference Map (Lazy Load)
+
+| Scope | Reference |
+| --- | --- |
+| Free LLM APIs for Claude Code / Groq / OpenRouter / NVIDIA NIM | `references/free-llm-apis.md` |
+| 1,400+ free public APIs by category (no-auth, apiKey, OAuth) | `references/public-apis-catalog.md` |
+
 ## Risk Auditor
 
 Dimensions assessed:
