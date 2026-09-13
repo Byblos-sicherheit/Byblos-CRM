@@ -33,6 +33,7 @@ Covers the full software development lifecycle. This skill merges 23 engineering
 | Browser testing, DevTools | `references/browser-testing.md` |
 | Interview preparation | `references/interview.md` |
 | Idea refinement | `references/idea-refine.md` |
+| Swift persistence — SQLite, SwiftData replacement, CloudKit sync | `references/swift-sqlite-data.md` |
 
 ## Universal Engineering Principles
 
