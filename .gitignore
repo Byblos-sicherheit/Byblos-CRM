@@ -57,3 +57,9 @@ docker-compose.override.yml
 # Inno Setup temporär
 Output/
 *.exe
+
+# MCP & Secrets
+.mcp.json
+.env
+.env.*
+!.env.example

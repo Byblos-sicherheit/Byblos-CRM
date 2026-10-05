@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "wordpress": {
+      "type": "http",
+      "url": "https://byblos-sicherheit.de/wp-json/easy-mcp-ai/v1/mcp",
+      "headers": {
+        "Authorization": "Bearer ${BYBLOS_MCP_API_KEY}"
+      }
+    }
+  }
+}
