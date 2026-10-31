@@ -86,6 +86,7 @@ Load only references relevant to the current task:
 | Completion checklist before declaring done | `references/completion-criteria.md` |
 | UX rules priority table (10 categories, pre-delivery checklist) | `references/ux-rules-priority.md` |
 | 100+ famous design systems (Claude, Vercel, Stripe, Linear…) | `references/famous-design-systems.md` |
+| 21st.dev, refero.design, supahero.io, motion.dev, 60fps.design | `references/design-tool-references.md` |
 
 ## 6. Anti-Generic Design Gate
 

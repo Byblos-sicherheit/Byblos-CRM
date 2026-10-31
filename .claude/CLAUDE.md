@@ -2,7 +2,7 @@
 
 ## Active Skills
 
-This repository uses the **Byblos Universal Skill Suite** — a merged collection of 16 skill domains.
+This repository uses the **Byblos Universal Skill Suite** — a merged collection of 38 skill domains.
 
 ### Skill Triggers
 
@@ -24,6 +24,8 @@ This repository uses the **Byblos Universal Skill Suite** — a merged collectio
 | "shadcn", "tailwind", "ui component", "dialog", "form", "data table", "dark mode", "theme", "responsive layout", "component library", "radix", "shadcn/ui" | `/ui-styling` |
 | "IT analysis", "technical audit", "port table", "DNS config", "network diagram", "architecture diagram", "IT screenshot", "infographic analysis", "troubleshooting guide", "study notes" | `/technical-it-analyst` |
 | "SEO audit", "keyword research", "Core Web Vitals", "schema markup", "local SEO", "backlink", "sitemap", "meta tags", "programmatic SEO", "search ranking" | `/seo` |
+| "clone this app", "reverse engineer X", "copy this app", "replica-recon", "replica-architect", "replica-build", "replica-backend", "replica-test", "replica-diff", "replica-entrepreneur", "replica-brand", "replica-launch", "replica-deploy", "replica-design", "I want to build my own version of X" | `/replica-recon` (then follow the 11-step pipeline) |
+| "YouTube script", "video script", "hook formula", "yt-script", "yt-edit", "yt-package", "yt-plan", "yt-viral", "yt-retention", "yt-shorts", "yt-seo", "yt-comment", "yt-chapters", "yt-audit", "write my next video", "what should I say", "YouTube channel" | `/yt-script` (or the specific yt-* skill) |
 
 ### Orchestrator Rule
 
