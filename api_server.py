@@ -30,6 +30,7 @@ except ImportError:
 # ─────────────────────────────────────────────────────────────
 
 DB_PATH = Path(__file__).parent / "byblos_crm.db"
+BASE_DIR = Path(__file__).parent.resolve()
 
 app = FastAPI(
     title="Byblos CRM REST-API",
@@ -38,13 +39,17 @@ app = FastAPI(
     contact={"name": "Byblos Support"},
 )
 
-# CORS für Web-Apps
+# CORS für Web-Apps — Quelle aus Umgebungsvariable, kein Wildcard mit Credentials
+import os as _os
+_cors_raw = _os.environ.get("CORS_ALLOWED_ORIGINS", "http://localhost:8501")
+_cors_origins = [o.strip() for o in _cors_raw.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In Produktion einschränken
+    allow_origins=_cors_origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE"],
-    allow_headers=["*"],
+    allow_headers=["X-API-Key", "Content-Type", "Accept"],
 )
 
 
@@ -229,7 +234,9 @@ def get_invoice_pdf(invoice_id: int, conn=Depends(get_db)):
         raise HTTPException(404)
     if not row["pdf_path"]:
         raise HTTPException(404, "PDF noch nicht erzeugt – im CRM erstellen lassen")
-    pdf_path = Path(row["pdf_path"])
+    pdf_path = Path(row["pdf_path"]).resolve()
+    if not str(pdf_path).startswith(str(BASE_DIR)):
+        raise HTTPException(403, "Ungültiger PDF-Pfad")
     if not pdf_path.exists():
         raise HTTPException(404, "PDF-Datei nicht gefunden")
     return FileResponse(str(pdf_path), media_type="application/pdf",
