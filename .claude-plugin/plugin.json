@@ -1,0 +1,50 @@
+{
+  "name": "byblos-universal-suite",
+  "description": "Byblos Universal Skill Suite — a merged collection of 16 skill domains covering engineering, infrastructure, free-services, animation, UI design, UI styling (shadcn/Tailwind), NoSQL databases, security auditing, marketing, browser testing, IT analysis, SEO, and meta-orchestration.",
+  "version": "2.1.0",
+  "author": {
+    "name": "Byblos Sicherheit & Facility Services",
+    "url": "https://github.com/byblos-sicherheit"
+  },
+  "homepage": "https://github.com/byblos-sicherheit/byblos-crm",
+  "repository": "https://github.com/byblos-sicherheit/byblos-crm",
+  "license": "MIT",
+  "keywords": [
+    "byblos",
+    "sicherheit",
+    "engineering",
+    "infrastructure",
+    "claude-code",
+    "skills",
+    "agent-team",
+    "meta-skill",
+    "harness",
+    "orchestration",
+    "crm",
+    "free-services",
+    "ui-design",
+    "nosql",
+    "security-audit",
+    "marketing",
+    "playwright",
+    "seo"
+  ],
+  "skills": [
+    "byblos-master",
+    "engineering",
+    "infrastructure",
+    "free-services",
+    "animation",
+    "meta-harness",
+    "meta-observer",
+    "setup",
+    "interface-design",
+    "nosql",
+    "security-audit",
+    "marketing",
+    "playwright",
+    "technical-it-analyst",
+    "seo",
+    "ui-styling"
+  ]
+}
