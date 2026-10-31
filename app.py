@@ -547,13 +547,21 @@ def init_db():
 
 def hash_password(password):
     salt = secrets.token_hex(16)
-    digest = hashlib.sha256((salt + password).encode('utf-8')).hexdigest()
-    return f"{salt}${digest}"
+    dk = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt.encode('utf-8'), 600_000)
+    return f"pbkdf2${salt}${dk.hex()}"
 
 def verify_password(password, stored):
     try:
-        salt, digest = stored.split('$', 1)
-        return hashlib.sha256((salt + password).encode('utf-8')).hexdigest() == digest
+        parts = stored.split('$')
+        if len(parts) == 3 and parts[0] == 'pbkdf2':
+            _, salt, digest = parts
+            dk = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt.encode('utf-8'), 600_000)
+            return secrets.compare_digest(dk.hex(), digest)
+        # legacy SHA-256 format (salt$digest) — accept once, hash will be upgraded on next save
+        salt, digest = parts[0], parts[1]
+        return secrets.compare_digest(
+            hashlib.sha256((salt + password).encode('utf-8')).hexdigest(), digest
+        )
     except Exception:
         return False
 
