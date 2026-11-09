@@ -1,0 +1,4 @@
+interface:
+  display_name: "Free Dev Risk Auditor"
+  short_description: "Audit free-tier billing, security, data, and lock-in risks"
+  brand_color: "#1677FF"

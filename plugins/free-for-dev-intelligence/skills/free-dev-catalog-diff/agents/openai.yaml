@@ -1,0 +1,4 @@
+interface:
+  display_name: "Free Dev Catalog Diff"
+  short_description: "Compare free-for.dev snapshots and flag material changes"
+  brand_color: "#1677FF"

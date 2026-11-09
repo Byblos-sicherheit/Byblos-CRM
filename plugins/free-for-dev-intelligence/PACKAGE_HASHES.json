@@ -1,0 +1,143 @@
+{
+  "schema": "free-dev-package-hashes/v4",
+  "version": "4.0.0",
+  "skills": [
+    {
+      "path": "dist/free-dev-alternative-finder/skill.zip",
+      "bytes": 2737,
+      "sha256": "6e5ee7837118329b18974bd4ee331aaa15cfcbbeace9e174f320add4d87d4917"
+    },
+    {
+      "path": "dist/free-dev-architecture-designer/skill.zip",
+      "bytes": 2932,
+      "sha256": "ff39eb211520d5a77c69d44ba29c2ab249d7ede9130fb781634be228c5460705"
+    },
+    {
+      "path": "dist/free-dev-catalog-diff/skill.zip",
+      "bytes": 8443,
+      "sha256": "5bfbebfc145cf4a5aacc7c22427a72de0c45c1b4416d83735cd34e6327e7da90"
+    },
+    {
+      "path": "dist/free-dev-catalog-index/skill.zip",
+      "bytes": 4345,
+      "sha256": "6d723947f20e29edbb2f8ef0f9cc4e8c8de8e84da0fdc2eb47f1f2ab3031cae2"
+    },
+    {
+      "path": "dist/free-dev-catalog-search/skill.zip",
+      "bytes": 10135,
+      "sha256": "0f1e545c37beb91db30f6c1ab143accd6a6ef9bf0c478930e1003f0d406a9acf"
+    },
+    {
+      "path": "dist/free-dev-change-watch/skill.zip",
+      "bytes": 2520,
+      "sha256": "f944e443f654961b0f6112ab73fa6010a78d7b4ec3046086112607dc3eaec8fa"
+    },
+    {
+      "path": "dist/free-dev-compliance-filter/skill.zip",
+      "bytes": 2446,
+      "sha256": "52464f9adefad87504e432e2ea04e8096dd60d81ab78895341b9452cbbba2d0b"
+    },
+    {
+      "path": "dist/free-dev-cost-estimator/skill.zip",
+      "bytes": 2576,
+      "sha256": "d1eb11fd7503bbf332c71fc05529c589d52cdb5183bf88333af3f92ab68830df"
+    },
+    {
+      "path": "dist/free-dev-exporter/skill.zip",
+      "bytes": 2509,
+      "sha256": "cc47fb806051068c49edc585cd894887c3db9ad1ecbb1dfacc77330052dfd39e"
+    },
+    {
+      "path": "dist/free-dev-intelligence/skill.zip",
+      "bytes": 4370,
+      "sha256": "0c149eb691673656977845b8f55be013a1c84e5d8aac0c3d687e9c7b45df3cb2"
+    },
+    {
+      "path": "dist/free-dev-live-sync/skill.zip",
+      "bytes": 2798,
+      "sha256": "b090d6a2f48e32737ca00c049046182817fcdeea692bb2ebd35cd491f9862af1"
+    },
+    {
+      "path": "dist/free-dev-migration-planner/skill.zip",
+      "bytes": 2717,
+      "sha256": "dcea53f837f7dbef41a23bff85154dba228dda30ec7293e15bf0bb3951b41414"
+    },
+    {
+      "path": "dist/free-dev-provider-profile/skill.zip",
+      "bytes": 3016,
+      "sha256": "5b94bce27f340401fe0b67e15d41207921dc77780ffcd48e2e5c786fd23df481"
+    },
+    {
+      "path": "dist/free-dev-query-router/skill.zip",
+      "bytes": 4547,
+      "sha256": "697d5268014a2a7797e7a47d35e808f9d798da2ee92b723bb482a6753ba09e22"
+    },
+    {
+      "path": "dist/free-dev-risk-auditor/skill.zip",
+      "bytes": 6681,
+      "sha256": "02c329d3d1d706128ec369e8c24f84280879e5bb580b8b9ec9e2b2d8a64cbe3f"
+    },
+    {
+      "path": "dist/free-dev-service-comparator/skill.zip",
+      "bytes": 3536,
+      "sha256": "71f8e5b8639f9dbde75eae25d1adb994ce6d89f66095ea00d286d22ddc3c3fc7"
+    },
+    {
+      "path": "dist/free-dev-stack-planner/skill.zip",
+      "bytes": 6084,
+      "sha256": "1d88de7e3fb60dc3d940e7b54e579730b2c373154438b07541ce371f28f0a6b4"
+    },
+    {
+      "path": "dist/free-dev-tier-verifier/skill.zip",
+      "bytes": 4274,
+      "sha256": "3858057528a2817c28daf30599311455a5fa560de28c01511eb38276cc626e4a"
+    }
+  ],
+  "core": [
+    {
+      "path": ".codex-plugin/plugin.json",
+      "bytes": 1447,
+      "sha256": "76c23f3e010fe3a67a0ee58b4bde8c6ea64f9e57273aa8bf3841281e6cd8dba5"
+    },
+    {
+      "path": ".mcp.json",
+      "bytes": 105,
+      "sha256": "51c4ace0c4c03ff81ceceeb32ccd755efbbd1be02f91c99bdd9f0ca6df884cfd"
+    },
+    {
+      "path": ".app.json.template",
+      "bytes": 119,
+      "sha256": "348ca5583a2bb4fede9086edebda156c58d7b07d01b58cd5c3a8e44da62d7b47"
+    },
+    {
+      "path": ".agents/plugins/marketplace.json",
+      "bytes": 390,
+      "sha256": "27b207afa96248f78f7c5de091fbfe231c642d252c0e3a383f8b6616139c9b9a"
+    },
+    {
+      "path": "mcp_server/free_dev_mcp.py",
+      "bytes": 35116,
+      "sha256": "120c05216e62ac79d3d224379b11a9bd121de3ecf20225bb8f5446914813cb97"
+    },
+    {
+      "path": "mcp_server/free-dev-mcp",
+      "bytes": 122,
+      "sha256": "464b28a60560d74ca8b4ae5c6824ccd613b09b48edd37a6a67e16f02ab53c7e7"
+    },
+    {
+      "path": "mcp_server/web/comparison.html",
+      "bytes": 3699,
+      "sha256": "bba301dd3416626629f23ad7444f87c67c09523d876dbffe7d79486dcdf1f5f0"
+    },
+    {
+      "path": "scripts/bind_chatgpt_app.py",
+      "bytes": 1110,
+      "sha256": "3efe6dfc8ceb1180d77de61143897e660a1d74a4aa29f18a626518b68a7c31dd"
+    },
+    {
+      "path": "bundle-manifest.json",
+      "bytes": 4799,
+      "sha256": "bbb537cf9566cff58061cb06b8a8a25b8b11f05f6c5d460072780619098ad58f"
+    }
+  ]
+}

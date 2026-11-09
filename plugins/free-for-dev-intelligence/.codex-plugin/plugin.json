@@ -1,0 +1,37 @@
+{
+  "name": "free-for-dev-intelligence",
+  "version": "4.0.0",
+  "description": "Evidence-aware free-tier discovery, comparison, cost, risk, architecture, migration, and change analysis backed by free-for.dev.",
+  "author": {
+    "name": "Byblos Sicherheit & Facility Services",
+    "email": "info@byblos-sicherheit.de"
+  },
+  "license": "MIT",
+  "keywords": [
+    "free-tier",
+    "developer-tools",
+    "devops",
+    "cloud",
+    "saas",
+    "cost",
+    "compliance"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Free for Dev Intelligence",
+    "shortDescription": "Find, verify and compare developer free tiers",
+    "longDescription": "Search the free-for.dev catalog, normalize evidence, compare services under hard constraints, model quota and cost headroom, audit risk, design architectures, plan migrations, detect changes, and export results.",
+    "developerName": "Byblos Sicherheit & Facility Services",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Find production-suitable PostgreSQL free tiers without a required credit card and identify facts that still need provider verification.",
+      "Compare these free-tier services for EU use, billing safety, portability, and expected workload.",
+      "Design a low-cost developer stack and show which free-tier limits are closest to exhaustion."
+    ]
+  }
+}

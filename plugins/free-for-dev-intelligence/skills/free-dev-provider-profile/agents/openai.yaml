@@ -1,0 +1,4 @@
+interface:
+  display_name: "Free Dev Provider Profile"
+  short_description: "Build provider evidence dossiers"
+  brand_color: "#1677FF"

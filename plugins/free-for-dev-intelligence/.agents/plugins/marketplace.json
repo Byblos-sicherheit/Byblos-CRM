@@ -1,0 +1,20 @@
+{
+  "name": "byblos-local-plugins",
+  "interface": {
+    "displayName": "Byblos Local Plugins"
+  },
+  "plugins": [
+    {
+      "name": "free-for-dev-intelligence",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}
