@@ -19,6 +19,8 @@ from typing import Any, Dict, List, Optional
 import pandas as pd
 import streamlit as st
 
+import crm_stage1
+
 
 # ─────────────────────────────────────────────────────────────
 # Hilfsfunktionen
@@ -76,16 +78,69 @@ def confirm_delete(key: str, label: str = "🗑️ Löschen") -> bool:
 # 1. Verbesserte Kundenverwaltung
 # ─────────────────────────────────────────────────────────────
 
+def _num(value: Any) -> float:
+    try:
+        f = float(value)
+    except (TypeError, ValueError):
+        return 0.0
+    return 0.0 if pd.isna(f) else f
+
+
+def _stage1_fields(row: Dict[str, Any], key: str) -> Dict[str, Any]:
+    """Stufe-1-Felder (Sparte, Quelle, Website, Koordinaten) innerhalb eines Kundenformulars."""
+    a, b = st.columns(2)
+    current = row.get("sparte") or "Unbekannt"
+    idx = crm_stage1.SPARTEN.index(current) if current in crm_stage1.SPARTEN else 0
+    fields = {
+        "sparte": a.selectbox("Sparte *", crm_stage1.SPARTEN, index=idx, key=f"{key}_sparte"),
+        "source": b.text_input("Quelle (woher stammt der Kontakt?)", str(row.get("source") or ""), key=f"{key}_source"),
+        "website": a.text_input("Website", str(row.get("website") or ""), key=f"{key}_web"),
+    }
+    g1, g2, g3 = st.columns(3)
+    fields["lat"] = g1.number_input("Breitengrad", value=_num(row.get("lat")), format="%.5f", key=f"{key}_lat")
+    fields["lon"] = g2.number_input("Längengrad", value=_num(row.get("lon")), format="%.5f", key=f"{key}_lon")
+    fields["geocode"] = g3.checkbox("Koordinaten aus Adresse ermitteln (OpenStreetMap)", key=f"{key}_geo")
+    fields["force"] = st.checkbox("Trotz möglicher Dublette speichern (geprüft)", key=f"{key}_force")
+    return fields
+
+
+def _stage1_check(df_fn, fields: Dict[str, Any], company: str, email: str, street: str, zip_city: str,
+                  country: str, exclude_id: Optional[int] = None) -> Optional[tuple]:
+    """Koordinaten und Distanz ermitteln, Dubletten prüfen. (lat, lon, km) oder None, wenn blockiert."""
+    lat, lon = fields["lat"], fields["lon"]
+    if fields["geocode"]:
+        hit = crm_stage1.geocode(street, zip_city, country)
+        if hit:
+            lat, lon = hit
+        else:
+            st.warning("Adresse nicht gefunden oder kein Internet – Koordinaten bitte manuell eintragen.")
+    has_coords = not (lat == 0.0 and lon == 0.0)
+    km = crm_stage1.distance_from_base(lat, lon) if has_coords else None
+    rows = df_fn("SELECT * FROM customers").to_dict("records")
+    dupes = crm_stage1.find_duplicates_in(rows, company, email, fields["website"], street, zip_city, exclude_id)
+    if dupes and not fields["force"]:
+        st.error("Mögliche Dublette – nicht gespeichert:\n" +
+                 "\n".join(f"- {d[1]} (Treffer: {', '.join(d[2])})" for d in dupes))
+        return None
+    status = crm_stage1.radius_status(km)
+    st.session_state["cust_flash"] = f"Radius: {status}" + (f" ({km} km Luftlinie)" if km is not None else "")
+    return (lat if has_coords else None, lon if has_coords else None, km)
+
+
 def page_customers_v2(run_fn, df_fn, next_number_fn, log_fn) -> None:
     st.title("👥 Kundenverwaltung")
+    flash = st.session_state.pop("cust_flash", None)
+    if flash:
+        (st.success if "im Radius" in flash else st.warning)(flash)
 
     # Suchleiste + Filter
-    col_s, col_f = st.columns([3, 1])
+    col_s, col_f, col_sp = st.columns([3, 1, 1])
     q = col_s.text_input("🔍 Suche (Firma, Nr., Ansprechperson, E-Mail)", "")
     only_active = col_f.checkbox("Nur aktive", value=False)
+    sparte_filter = col_sp.selectbox("Sparte", ["Alle"] + list(crm_stage1.SPARTEN), key="cust_sparte_filter")
 
     base_q = """
-        SELECT c.id, c.customer_no AS Nr, c.company AS Firma,
+        SELECT c.id, c.customer_no AS Nr, c.company AS Firma, c.sparte AS Sparte, c.distance_km AS km_Luftlinie,
                c.contact_person AS Ansprechperson, c.email AS E_Mail,
                c.phone AS Telefon, c.street AS Straße, c.zip_city AS PLZ_Ort,
                c.country AS Land,
@@ -98,8 +153,13 @@ def page_customers_v2(run_fn, df_fn, next_number_fn, log_fn) -> None:
     if q:
         where_parts.append("(c.company LIKE ? OR c.customer_no LIKE ? OR c.contact_person LIKE ? OR c.email LIKE ?)")
         params += [f"%{q}%"] * 4
+    if sparte_filter != "Alle":
+        where_parts.append("c.sparte=?")
+        params.append(sparte_filter)
     where = ("WHERE " + " AND ".join(where_parts)) if where_parts else ""
     data = df_fn(base_q + where + " ORDER BY c.company", tuple(params))
+    if not data.empty:
+        data.insert(5, "Radius", data["km_Luftlinie"].apply(lambda km: crm_stage1.radius_status(None if pd.isna(km) else km)))
 
     tabs = st.tabs(["📋 Übersicht", "➕ Neu anlegen", "✏️ Bearbeiten", "📊 Kundendetails"])
 
@@ -128,6 +188,7 @@ def page_customers_v2(run_fn, df_fn, next_number_fn, log_fn) -> None:
             street = b.text_input("Straße + Nr.", "")
             zip_city = a.text_input("PLZ Ort", "")
             country = b.text_input("Land", "Deutschland")
+            stage1 = _stage1_fields({}, "cust_new")
             notes = st.text_area("Notizen / Besonderheiten", "")
             submitted = st.form_submit_button("💾 Kunden speichern", type="primary")
 
@@ -135,12 +196,16 @@ def page_customers_v2(run_fn, df_fn, next_number_fn, log_fn) -> None:
             if not company.strip():
                 st.error("Firmenname ist Pflichtfeld.")
             else:
-                run_fn("""INSERT INTO customers(customer_no,company,contact_person,email,phone,street,zip_city,country,notes)
-                          VALUES(?,?,?,?,?,?,?,?,?)""",
-                       (customer_no, company, contact_person, email, phone, street, zip_city, country, notes))
-                log_fn("customer_created", company)
-                st.success(f"✅ Kunde '{company}' ({customer_no}) angelegt!")
-                st.rerun()
+                geo = _stage1_check(df_fn, stage1, company, email, street, zip_city, country)
+                if geo is not None:
+                    run_fn("""INSERT INTO customers(customer_no,company,contact_person,email,phone,street,zip_city,country,notes,
+                                                    sparte,website,source,lat,lon,distance_km)
+                              VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                           (customer_no, company, contact_person, email, phone, street, zip_city, country, notes,
+                            stage1["sparte"], stage1["website"], stage1["source"]) + geo)
+                    log_fn("customer_created", company)
+                    st.success(f"✅ Kunde '{company}' ({customer_no}) angelegt!")
+                    st.rerun()
 
     with tabs[2]:
         customers = df_fn("SELECT id, customer_no || ' – ' || company AS label FROM customers ORDER BY company")
@@ -161,17 +226,21 @@ def page_customers_v2(run_fn, df_fn, next_number_fn, log_fn) -> None:
             street = b.text_input("Straße + Nr.", str(row.get("street", "") or ""))
             zip_city = a.text_input("PLZ Ort", str(row.get("zip_city", "") or ""))
             country = b.text_input("Land", str(row.get("country", "Deutschland") or "Deutschland"))
+            stage1 = _stage1_fields(row, f"cust_edit_{cid}")
             notes = st.text_area("Notizen", str(row.get("notes", "") or ""))
             col1, col2 = st.columns(2)
             save = col1.form_submit_button("💾 Änderungen speichern", type="primary")
 
         if save and company.strip():
-            run_fn("""UPDATE customers SET customer_no=?,company=?,contact_person=?,email=?,phone=?,
-                      street=?,zip_city=?,country=?,notes=? WHERE id=?""",
-                   (customer_no, company, contact_person, email, phone, street, zip_city, country, notes, cid))
-            log_fn("customer_updated", company)
-            st.success("✅ Kunde aktualisiert!")
-            st.rerun()
+            geo = _stage1_check(df_fn, stage1, company, email, street, zip_city, country, exclude_id=cid)
+            if geo is not None:
+                run_fn("""UPDATE customers SET customer_no=?,company=?,contact_person=?,email=?,phone=?,
+                          street=?,zip_city=?,country=?,notes=?,sparte=?,website=?,source=?,lat=?,lon=?,distance_km=? WHERE id=?""",
+                       (customer_no, company, contact_person, email, phone, street, zip_city, country, notes,
+                        stage1["sparte"], stage1["website"], stage1["source"]) + geo + (cid,))
+                log_fn("customer_updated", company)
+                st.success("✅ Kunde aktualisiert!")
+                st.rerun()
 
         st.divider()
         st.markdown("**⚠️ Gefährliche Aktionen**")
