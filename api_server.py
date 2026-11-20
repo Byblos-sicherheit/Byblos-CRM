@@ -10,6 +10,8 @@ Docs:         http://localhost:8000/docs
 
 import sqlite3
 from pathlib import Path
+
+import crm_stage1
 from datetime import datetime
 from typing import Optional, List
 
@@ -96,6 +98,8 @@ class CustomerCreate(BaseModel):
     phone: Optional[str] = ""
     street: Optional[str] = ""
     zip_city: Optional[str] = ""
+    website: Optional[str] = ""
+    sparte: Optional[str] = "Unbekannt"
 
 
 class CheckinRequest(BaseModel):
@@ -166,16 +170,24 @@ def get_customer(customer_id: int, conn=Depends(get_db)):
 @app.post("/api/v1/customers", tags=["Customers"], status_code=201,
           dependencies=[Depends(verify_api_key)])
 def create_customer(customer: CustomerCreate, conn=Depends(get_db)):
+    if customer.sparte not in crm_stage1.SPARTEN:
+        raise HTTPException(422, f"sparte muss eine von {', '.join(crm_stage1.SPARTEN)} sein")
+    crm_stage1.ensure_columns(conn)
+    dupes = crm_stage1.find_duplicates(conn, customer.company, customer.email, customer.website,
+                                       customer.street, customer.zip_city)
+    if dupes:
+        raise HTTPException(409, {"message": "Mögliche Dublette", "matches": [
+            {"id": d[0], "company": d[1], "reasons": d[2]} for d in dupes]})
     # Auto-Nummer
     cur = conn.execute("SELECT MAX(CAST(SUBSTR(customer_no, 4) AS INT)) as max_no FROM customers WHERE customer_no LIKE 'SD-%'")
     row = cur.fetchone()
     next_no = (row["max_no"] or 0) + 1
     cust_no = f"SD-{next_no:04d}"
     conn.execute(
-        """INSERT INTO customers(customer_no,company,contact_person,email,phone,street,zip_city)
-           VALUES(?,?,?,?,?,?,?)""",
+        """INSERT INTO customers(customer_no,company,contact_person,email,phone,street,zip_city,website,sparte,source)
+           VALUES(?,?,?,?,?,?,?,?,?,?)""",
         (cust_no, customer.company, customer.contact_person, customer.email,
-         customer.phone, customer.street, customer.zip_city)
+         customer.phone, customer.street, customer.zip_city, customer.website, customer.sparte, "API")
     )
     conn.commit()
     new_id = conn.execute("SELECT last_insert_rowid() as id").fetchone()["id"]

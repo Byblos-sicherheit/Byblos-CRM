@@ -31,6 +31,8 @@ from pathlib import Path
 
 import pandas as pd
 import streamlit as st
+import crm_stage1
+from numbering import next_number_from
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
@@ -542,6 +544,8 @@ def init_db():
         register_business_ops(run, df)
     except Exception:
         pass
+    with conn() as c:
+        crm_stage1.ensure_columns(c)
     seed_if_empty()
 
 
@@ -636,17 +640,8 @@ def seed_if_empty():
 
 
 def next_number(table, col, prefix):
-    data = df(f"SELECT {col} FROM {table} WHERE {col} LIKE ? ORDER BY {col} DESC LIMIT 1", (f"{prefix}%",))
-    if data.empty or not data.iloc[0][col]:
-        return f"{prefix}0001"
-    raw = str(data.iloc[0][col]).replace(prefix, "").replace("-", "")
-    try:
-        n = int(raw) + 1
-    except ValueError:
-        n = 1
-    if prefix.endswith("-"):
-        return f"{prefix}{n:04d}"
-    return f"{prefix}{n:04d}"
+    data = df(f"SELECT {col} FROM {table} WHERE {col} LIKE ?", (f"{prefix}%",))
+    return next_number_from(data[col].tolist(), prefix)
 
 
 def refresh_invoice_totals(invoice_id):
@@ -1448,10 +1443,14 @@ def process_import_queue_item(qid, force=False, learn=False):
         elif it == 'kunden':
             name = raw.get('company') or raw.get('kunde') or raw.get('firma') or raw.get('name') or ''
             if name:
-                exists = df("SELECT id FROM customers WHERE lower(company)=lower(?)", (name,))
-                if exists.empty:
-                    run("""INSERT INTO customers(customer_no,company,contact_person,email,phone,street,zip_city,country,notes)
-                           VALUES(?,?,?,?,?,?,?,?,?)""", (raw.get('customer_no') or next_number('customers','customer_no','SD-'), name, raw.get('contact_person',''), raw.get('email',''), raw.get('phone',''), raw.get('street',''), raw.get('zip_city',''), raw.get('country','Deutschland'), 'automatisch importiert'))
+                with conn() as c:
+                    dupes = crm_stage1.find_duplicates(c, name, raw.get('email', ''), raw.get('website', ''), raw.get('street', ''), raw.get('zip_city', ''))
+                if dupes:
+                    run("UPDATE import_queue SET status='doppelt', processed_at=CURRENT_TIMESTAMP WHERE id=?", (qid,))
+                    return 'Mögliche Dublette: ' + '; '.join(f"{d[1]} ({', '.join(d[2])})" for d in dupes)
+                sparte = raw.get('sparte') if raw.get('sparte') in crm_stage1.SPARTEN else 'Unbekannt'
+                run("""INSERT INTO customers(customer_no,company,contact_person,email,phone,street,zip_city,country,notes,sparte,website,source)
+                       VALUES(?,?,?,?,?,?,?,?,?,?,?,?)""", (raw.get('customer_no') or next_number('customers','customer_no','SD-'), name, raw.get('contact_person',''), raw.get('email',''), raw.get('phone',''), raw.get('street',''), raw.get('zip_city',''), raw.get('country','Deutschland'), 'automatisch importiert', sparte, raw.get('website',''), 'CSV-Import'))
         elif it == 'rechnungen':
             inv_no = raw.get('invoice_no') or raw.get('rechnungsnummer') or ''
             if inv_no and not df("SELECT id FROM invoices WHERE invoice_no=?", (inv_no,)).empty:
