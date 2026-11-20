@@ -34,6 +34,7 @@ import streamlit as st
 import crm_stage1
 import crm_stage2
 import crm_stage3
+import crm_stage4
 from numbering import next_number_from
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
@@ -516,6 +517,9 @@ def init_db():
         register_fieldops(run, df)
     except Exception:
         pass
+    # Basistabellen der Field-Ops-Seiten (service_objects, field_employees, field_shifts …); war versehentlich auskommentiert
+    import extensions_fieldops
+    extensions_fieldops.register_fieldops(run, df)
     try:
         from extensions_v2_automation_ops import register_automation
         register_automation(run, df)
@@ -550,6 +554,7 @@ def init_db():
         crm_stage1.ensure_columns(c)
         crm_stage2.ensure_tables(c)
         crm_stage3.ensure_tables(c)
+        crm_stage4.ensure_columns(c)
     seed_if_empty()
 
 
@@ -1744,14 +1749,6 @@ def sidebar():
         "🔒 Datenschutz": ["DSGVO-Center"],
         "✉️ Serienbriefe": ["Serienbrief"],
         "🌐 Erweitert": ["Sprache", "OCR-Belegerfassung", "Zahlungslinks", "Webhooks", "Mobile-Modus", "FastAPI-Server"],
-        "🏗️ Field-Ops": ["Angebot-zu-Rechnung", "Kunden-Timeline", "Personalakte"],
-        "⏱️ Zeit & Personal": ["Deckungsbeitrag", "XLSX-Rechnungsimport"],
-        "🔧 Betrieb": ["Verschlüsseltes Backup", "Performance-Monitor"],
-        "📋 Verwaltung": ["Benachrichtigungen", "Schicht-Kalender",
-                          "ZUGFeRD E-Rechnung", "Signaturen", "DB-Migrationen",
-                          "Rate-Limiting", "WhatsApp", "Kunden v2"],
-        "✉️ Kommunikation": ["Sammelrechnung", "Freigabe-Workflow", "Zapier-Templates",
-                            "Reklamationen", "Eskalations-Mahnwesen", "VCard-Import"],
         "📊 Verwaltung": ["Schichtpräferenzen", "Gewinn-je-Stunde", "Projekt-Gantt",
                           "ZUGFeRD Einbetten", "Cloud-Backup Plus", "Stripe",
                           "Lohnsteuer-Export", "ELMA5"],
@@ -1789,11 +1786,11 @@ def sidebar():
         "🔔 Hinweise": ["Hinweis-Center"],
         "☁️ Cloud & Betrieb": ["Cloud-Backup", "Live-Betrieb"],
         "📈 Betrieb": ["Betriebskosten", "Qualitätschecklisten", "Notfallkontakte"],
-        "🏗️ Field-Ops": ["Field-Ops Cockpit", "Mitarbeiter Einsatz", "Objekte", "Einsatzplanung", "Leistungsnachweise", "Field-Ops Export"],
-        "⏱️ Zeit & Personal": ["Zeiterfassung", "Zeiten freigeben", "Zeitkonto & Payroll", "Dienstplan", "Schichtübergabe", "Mitarbeiter"],
-        "🔧 Betrieb": ["SystemPlus Cockpit", "Live-Betrieb", "Ops Prüfungen", "Automatik", "Archiv/GoBD"],
-        "📋 Verwaltung": ["Verträge & Dokumente", "Compliance & Recht", "Rollenmatrix", "Kundenportal", "Leistungs-Checklisten"],
-        "✉️ Kommunikation": ["E-Mail"],
+        "🏗️ Field-Ops": ["Field-Ops Cockpit", "Mitarbeiter Einsatz", "Objekte", "Einsatzplanung", "Leistungsnachweise", "Field-Ops Export", "Angebot-zu-Rechnung", "Kunden-Timeline", "Personalakte"],
+        "⏱️ Zeit & Personal": ["Zeiterfassung", "Zeiten freigeben", "Zeitkonto & Payroll", "Dienstplan", "Schichtübergabe", "Mitarbeiter", "Deckungsbeitrag", "XLSX-Rechnungsimport"],
+        "🔧 Betrieb": ["SystemPlus Cockpit", "Live-Betrieb", "Ops Prüfungen", "Automatik", "Archiv/GoBD", "Verschlüsseltes Backup", "Performance-Monitor"],
+        "📋 Verwaltung": ["Verträge & Dokumente", "Compliance & Recht", "Rollenmatrix", "Kundenportal", "Leistungs-Checklisten", "Benachrichtigungen", "Schicht-Kalender", "ZUGFeRD E-Rechnung", "Signaturen", "DB-Migrationen", "Rate-Limiting", "WhatsApp", "Kunden v2"],
+        "✉️ Kommunikation": ["E-Mail", "Sammelrechnung", "Freigabe-Workflow", "Zapier-Templates", "Reklamationen", "Eskalations-Mahnwesen", "VCard-Import"],
 
     }
 
@@ -2802,7 +2799,7 @@ def main():
     elif page == "Field-Ops Cockpit": page_fieldops_cockpit(run, df)
     elif page == "Mitarbeiter Einsatz": page_employees_field(run, df)
     elif page == "Objekte": page_objects_field(run, df)
-    elif page == "Einsatzplanung": page_shift_planner(run, df)
+    elif page == "Einsatzplanung": page_shift_planner(run, df, conn)
     elif page == "Leistungsnachweise": page_service_reports(run, df)
     elif page == "Field-Ops Export": page_fieldops_exports(run, df)
     elif page == "E-Rechnung": page_einvoice_center(run, df, BASE_DIR)
