@@ -1,14 +1,16 @@
 from __future__ import annotations
 
-from datetime import date, timedelta
+from datetime import date, time, timedelta
 import pandas as pd
 import streamlit as st
+
+import crm_stage4
 
 SERVICES = ["Sicherheitsdienst", "Reinigung", "Hausmeister", "Umzug", "Entrümpelung"]
 SHIFT_STATUS = ["geplant", "aktiv", "erledigt", "Problem", "abgesagt"]
 
 
-def register_fieldops(run, df):
+def register_fieldops(run, df, seed=False):
     run('''CREATE TABLE IF NOT EXISTS field_employees (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         full_name TEXT NOT NULL,
@@ -74,7 +76,8 @@ def register_fieldops(run, df):
         note TEXT,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP
     )''')
-    seed_fieldops(run, df)
+    if seed:  # Demo-Mitarbeiter/-Objekt nur auf ausdrücklichen Wunsch, nie im Echtbetrieb
+        seed_fieldops(run, df)
 
 
 def seed_fieldops(run, df):
@@ -150,7 +153,7 @@ def page_employees_field(run, df):
 
 def page_objects_field(run, df):
     st.title("Objekte & Einsatzorte")
-    customers = df("SELECT id, name FROM customers ORDER BY name")
+    customers = df("SELECT id, company AS name FROM customers ORDER BY company")
     customer_options = ["0 - ohne Kunde"] + [f"{r.id} - {r.name}" for r in customers.itertuples()]
     with st.form("new_object"):
         cust = st.selectbox("Kunde", customer_options)
@@ -166,26 +169,42 @@ def page_objects_field(run, df):
     st.dataframe(df("SELECT * FROM service_objects ORDER BY active DESC, object_name"), use_container_width=True)
 
 
-def page_shift_planner(run, df):
+def page_shift_planner(run, df, conn_fn):
     st.title("Einsatz- & Schichtplanung")
-    objects = df("SELECT id, object_name, service_type FROM service_objects WHERE active=1 ORDER BY object_name")
+    objects = df("SELECT id, object_name, service_type, customer_id FROM service_objects WHERE active=1 ORDER BY object_name")
     emps = df("SELECT id, full_name FROM field_employees WHERE active=1 ORDER BY full_name")
     if objects.empty or emps.empty:
         st.warning("Lege zuerst mindestens ein Objekt und einen Mitarbeiter an.")
         return
+    orders = df("""SELECT o.id, o.offer_no, c.company FROM offers o LEFT JOIN customers c ON c.id=o.customer_id
+                   WHERE o.status='angenommen' ORDER BY o.id DESC""")
+    order_options = ["0 - ohne Auftrag"] + [f"{r.id} - {r.offer_no} ({r.company})" for r in orders.itertuples()]
     with st.form("new_shift"):
         obj_label = st.selectbox("Objekt", [f"{r.id} - {r.object_name} ({r.service_type})" for r in objects.itertuples()])
         emp_label = st.selectbox("Mitarbeiter", [f"{r.id} - {r.full_name}" for r in emps.itertuples()])
         service = st.selectbox("Leistung", SERVICES)
+        order_label = st.selectbox("Auftrag (angenommenes Angebot)", order_options)
         d = st.date_input("Datum", value=date.today())
         c1, c2 = st.columns(2)
-        start = c1.text_input("Start", "08:00")
-        end = c2.text_input("Ende", "16:00")
+        start = c1.time_input("Start", value=time(8, 0), step=900)
+        end = c2.time_input("Ende (vor Start = Nachtschicht)", value=time(16, 0), step=900)
+        contact = c1.text_input("Ansprechpartner vor Ort *")
+        phone = c2.text_input("Telefon Ansprechpartner")
+        access = st.text_input("Zugang / Berechtigungen (Beschreibung, keine Codes oder Passwörter)")
         instr = st.text_area("Anweisung")
         if st.form_submit_button("Einsatz planen"):
-            run("INSERT INTO field_shifts(object_id, employee_id, service_type, shift_date, start_time, end_time, instructions) VALUES(?,?,?,?,?,?,?)", (int(obj_label.split(' - ')[0]), int(emp_label.split(' - ')[0]), service, d.isoformat(), start, end, instr))
-            st.success("Einsatz geplant."); st.rerun()
-    q = df('''SELECT fs.id, fs.shift_date, fs.start_time, fs.end_time, fs.service_type, fs.status, so.object_name, fe.full_name, fs.instructions, fs.problem_note
+            order_id = int(order_label.split(" - ")[0]) or None
+            with conn_fn() as conn:
+                try:
+                    crm_stage4.plan_shift(conn, int(emp_label.split(' - ')[0]), int(obj_label.split(' - ')[0]), service,
+                                          d.isoformat(), start.strftime("%H:%M"), end.strftime("%H:%M"), contact, phone,
+                                          access, instr, order_id)
+                except ValueError as exc:
+                    st.error("Einsatz nicht geplant:\n" + "\n".join(f"- {r}" for r in str(exc).split("; ")))
+                else:
+                    st.success("Einsatz geplant.")
+    q = df('''SELECT fs.id, fs.shift_date, fs.start_time, fs.end_time, fs.service_type, fs.status, so.object_name, fe.full_name,
+                     fs.contact_person, fs.contact_phone, fs.access_permissions, fs.offer_id, fs.instructions, fs.problem_note
               FROM field_shifts fs LEFT JOIN service_objects so ON so.id=fs.object_id LEFT JOIN field_employees fe ON fe.id=fs.employee_id
               ORDER BY fs.shift_date DESC, fs.start_time DESC''')
     st.dataframe(q, use_container_width=True)
