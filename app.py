@@ -32,6 +32,7 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 import crm_stage1
+import crm_stage2
 from numbering import next_number_from
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
@@ -546,6 +547,7 @@ def init_db():
         pass
     with conn() as c:
         crm_stage1.ensure_columns(c)
+        crm_stage2.ensure_tables(c)
     seed_if_empty()
 
 
@@ -1709,7 +1711,7 @@ def sidebar():
     # Gruppierte Navigation
     SECTIONS = {
         "📊 Übersicht": ["Dashboard", "Berichte", "Reporting-Center", "Benachrichtigungen", "Globale Suche"],
-        "👥 CRM": ["Kunden", "Kontakte", "Firmenprofile", "Schnellsuche/KI", "KI-Auswertungen"],
+        "👥 CRM": ["Kunden", "Leads", "Kontakte", "Firmenprofile", "Schnellsuche/KI", "KI-Auswertungen"],
         "💰 Finanzen": ["Rechnungen", "Ausgaben/BWA", "Bank/DATEV", "Zahlungen & Mahnwesen", "Offene Posten", "E-Rechnung", "E-Rechnung Prüfung"],
         "📋 Angebote": ["Angebote"],
         "📥 Import / Export": ["Intelligenter Import", "Mehrfach-Rechnungsimport", "Import", "Export/Backup", "Export & Backup Center"],
@@ -2739,6 +2741,9 @@ def main():
             page_customers_v2(run, df, next_number, log_action)
         except Exception:
             page_customers()
+    elif page == "Leads":
+        from extensions_v2_leads import page_leads_v2
+        page_leads_v2(conn, df, log_action)
     elif page == "Kontakte":
         try:
             from extensions_v2_core_pages import page_contacts_v2
