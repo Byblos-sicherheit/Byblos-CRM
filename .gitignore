@@ -57,3 +57,6 @@ docker-compose.override.yml
 # Inno Setup temporär
 Output/
 *.exe
+
+# Erzeugte Dateien: Rechnungen, archivierte E-Mails (personenbezogen)
+generated/
