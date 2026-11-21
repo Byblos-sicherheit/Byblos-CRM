@@ -7,6 +7,7 @@ Kommandozeile (für Aufgabenplanung/Cron auf dem Zielrechner):
 Eine produktive Umstellung braucht weiterhin eine gesonderte technische Freigabe.
 """
 import base64
+import functools
 import hashlib
 import hmac
 import importlib.util
@@ -28,10 +29,72 @@ TOTP_DIGITS = 6
 BACKUP_MAX_AGE_DAYS = 7
 DEFAULT_ADMIN_PASSWORD = "admin123"  # nur zum Erkennen des unsicheren Auslieferungszustands
 ADMIN_ROLES = ("admin", "inhaber/admin", "inhaber", "administrator")
-# Module, die app.py importiert, die im Repository aber fehlen (Stand Stufe 8)
+# Module, die app.py importiert, die im Repository aber (ganz oder teilweise) fehlen
 OPTIONAL_MODULES = ("extensions_v2_polish", "extensions_v2_prod1", "extensions_v2_prod2", "extensions_v2_remote_access",
                     "extensions_v2_security", "extensions_v2_systemplus", "extensions_v2_sysutils",
                     "extensions_v2_ultra", "extensions_v2_xtra")
+# Seite -> (Modul, Funktion) für alle Seiten aus diesen Modulen. Fehlt die Funktion, wird die Seite ausgeblendet
+# statt eine Fehlermeldung zu zeigen; liefert jemand das Modul nach, erscheint sie automatisch.
+PAGE_SOURCES = {
+    "Intelligenter Import": ("extensions_v2_prod1", "page_smart_import_v2"),
+    "Angebots-PDF": ("extensions_v2_prod1", "page_offer_pdf"),
+    "Lohnzettel-Versand": ("extensions_v2_prod1", "page_payroll_email"),
+    "Rechnungsnummern-Check": ("extensions_v2_prod1", "page_invoice_number_check"),
+    "Projekt-zu-Rechnung": ("extensions_v2_prod1", "page_project_to_invoice"),
+    "Globale Suche": ("extensions_v2_polish", "page_global_search"),
+    "Massenaktionen": ("extensions_v2_polish", "page_bulk_actions"),
+    "PDF-Berichte": ("extensions_v2_polish", "page_pdf_report"),
+    "Liquiditätsplanung": ("extensions_v2_systemplus", "page_liquidity_planning"),
+    "Validierungs-Center": ("extensions_v2_systemplus", "page_validation_center"),
+    "Genehmigungs-Workflow": ("extensions_v2_systemplus", "page_approval_workflow"),
+    "Lieferscheine": ("extensions_v2_systemplus", "page_delivery_notes"),
+    "Schicht-Vorlagen": ("extensions_v2_systemplus", "page_shift_templates"),
+    "Backup-Verschlüsselung": ("extensions_v2_systemplus", "page_backup_encryption"),
+    "Personalkosten": ("extensions_v2_systemplus", "page_personnel_costs"),
+    "Hinweis-Center": ("extensions_v2_systemplus", "page_notifications_bell"),
+    "Webhooks": ("extensions_v2_systemplus", "page_webhooks"),
+    "Protokoll-Export": ("extensions_v2_sysutils", "page_protocol_export"),
+    "Passwort-Generator": ("extensions_v2_sysutils", "page_password_generator"),
+    "Updates": ("extensions_v2_sysutils", "page_update_checker"),
+    "ZUGFeRD E-Rechnung": ("extensions_v2_security", "page_zugferd_export"),
+    "Signaturen": ("extensions_v2_security", "page_document_signatures"),
+    "DB-Migrationen": ("extensions_v2_security", "page_schema_migrations"),
+    "Rate-Limiting": ("extensions_v2_security", "page_rate_limit_monitor"),
+    "WhatsApp": ("extensions_v2_security", "page_whatsapp_integration"),
+    "Kunden v2": ("extensions_v2_security", "page_customers_with_scoring"),
+    "Sprache": ("extensions_v2_xtra", "page_language_settings"),
+    "OCR-Belegerfassung": ("extensions_v2_xtra", "page_ocr_import"),
+    "Zahlungslinks": ("extensions_v2_xtra", "page_payment_links"),
+    "Mobile-Modus": ("extensions_v2_xtra", "page_mobile_mode"),
+    "FastAPI-Server": ("extensions_v2_xtra", "page_api_server_info"),
+    "GPS-Stempeluhr": ("extensions_v2_ultra", "page_gps_checkin"),
+    "Mahngebühren": ("extensions_v2_ultra", "page_late_fees"),
+    "KI-Chatbot": ("extensions_v2_ultra", "page_ai_chatbot"),
+    "Executive Summary": ("extensions_v2_ultra", "page_executive_summary"),
+    "Onboarding-Assistent": ("extensions_v2_ultra", "page_onboarding"),
+    "Druckansicht Dienstplan": ("extensions_v2_prod2", "page_print_schedule"),
+    "Mein Bereich": ("extensions_v2_prod2", "page_employee_portal"),
+    "Interne Nachrichten": ("extensions_v2_prod2", "page_internal_chat"),
+    "Remote-Zugang": ("extensions_v2_remote_access", "page_network_access"),
+    "Netzwerk-Status": ("extensions_v2_remote_access", "page_network_access"),
+}
+
+
+@functools.lru_cache(maxsize=None)
+def page_available(page):
+    source = PAGE_SOURCES.get(page)
+    if source is None:
+        return True
+    module, func = source
+    if importlib.util.find_spec(module) is None:
+        return False
+    return hasattr(importlib.import_module(module), func)
+
+
+def available_sections(sections):
+    """Bereiche ohne Seiten, deren Modul fehlt; leere Bereiche entfallen."""
+    result = {name: [p for p in pages if page_available(p)] for name, pages in sections.items()}
+    return {name: pages for name, pages in result.items() if pages}
 
 
 # ── 2FA (TOTP nach RFC 6238, SHA-1, 6 Stellen, 30 s – kompatibel mit gängigen Authenticator-Apps) ──
@@ -270,9 +333,9 @@ def health_report(db_path, verify_password=None, now=None):
             out.append((f"Automation: {s['label']}", "ok" if s["status"].startswith("aktiv") else "warnung", s["status"]))
     finally:
         c.close()
-    missing_mods = [m for m in OPTIONAL_MODULES if importlib.util.find_spec(m) is None]
-    out.append(("Erweiterungsmodule", "warnung" if missing_mods else "ok",
-                f"fehlen: {', '.join(missing_mods)}" if missing_mods else "vollständig"))
+    hidden = sorted(p for p in PAGE_SOURCES if not page_available(p))
+    out.append(("Erweiterungsmodule", "warnung" if hidden else "ok",
+                f"{len(hidden)} Seiten ausgeblendet (Modul fehlt): {', '.join(hidden)}" if hidden else "vollständig"))
     return out
 
 
