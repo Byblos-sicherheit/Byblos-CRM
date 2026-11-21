@@ -162,6 +162,27 @@ def test_tampered_backup_is_detected(dbfile, tmp_path):
     assert status(s8.health_report(dbfile), "Letzte Sicherung") == "fehler"
 
 
+def test_page_sources_match_app_dispatch():
+    """Jede Seite, die aus einem der unvollständigen Module lädt, steht in PAGE_SOURCES (erster Treffer gewinnt)."""
+    import re
+    from pathlib import Path
+    src = Path(__file__).with_name("app.py").read_text(encoding="utf-8")
+    found = {}
+    for block in src.split("\n    elif page ")[1:]:
+        body = block.split("\n    elif ")[0]
+        names = re.findall(r'"([^"]+)"', block.split(":", 1)[0])
+        imp = re.search(r"from (%s) import (\w+)" % "|".join(s8.OPTIONAL_MODULES), body)
+        for name in names if imp else []:
+            found.setdefault(name, (imp.group(1), imp.group(2)))
+    assert found == s8.PAGE_SOURCES
+
+
+def test_missing_pages_are_hidden_and_empty_sections_dropped():
+    s8.page_available.cache_clear()
+    sections = {"A": ["Kunden", "Mein Bereich"], "B": ["GPS-Stempeluhr"], "C": ["Intelligenter Import"]}
+    assert s8.available_sections(sections) == {"A": ["Kunden"]}, "prod1 existiert, aber ohne Seitenfunktion"
+
+
 def test_cli_backup_command_logs_run(dbfile, tmp_path, monkeypatch):
     monkeypatch.setattr(s8, "__file__", str(tmp_path / "crm_stage8.py"))
     dbfile.rename(tmp_path / "byblos_crm.db")
