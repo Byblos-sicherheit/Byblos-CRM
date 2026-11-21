@@ -54,6 +54,7 @@ SECTION_ROLES = {
     "🏗️ Field-Ops": {OPS},
     "⏱️ Zeit & Personal": {FIN, OPS},
     "✉️ Kommunikation": {FIN, SALES},
+    "🛡️ Sicherheit": {FIN, OPS, SALES, STAFF},  # nur eigene 2FA (Stufe 8)
 }
 
 
