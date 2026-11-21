@@ -685,8 +685,7 @@ def test_xlsx_import_mapping_logic():
 
 def test_amount_parsing():
     """Betrag-Parsing aus verschiedenen Formaten."""
-    def parse_amount(s: str) -> float:
-        return float(str(s).replace(".", "").replace(",", ".").replace("€","").strip())
+    from extensions_v2_prod1 import parse_de_amount as parse_amount
 
     assert parse_amount("1.190,00") == 1190.0
     assert parse_amount("1190,00") == 1190.0

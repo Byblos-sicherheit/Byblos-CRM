@@ -72,7 +72,7 @@ def train_model():
     X = vectorizer.fit_transform(texts)
     encoder = LabelEncoder()
     y = encoder.fit_transform(labels)
-    model = LogisticRegression(max_iter=500, C=1.0, solver="lbfgs", multi_class="auto")
+    model = LogisticRegression(max_iter=500, C=1.0, solver="lbfgs")  # multi_class entfällt seit scikit-learn 1.7; lbfgs ist ohnehin multinomial
     model.fit(X, y)
     return model, vectorizer, encoder
 

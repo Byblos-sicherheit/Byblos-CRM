@@ -1804,7 +1804,7 @@ def sidebar():
 
     }
 
-    SECTIONS = crm_stage5.allowed_sections(role, SECTIONS)
+    SECTIONS = crm_stage8.available_sections(crm_stage5.allowed_sections(role, SECTIONS))
     st.session_state["_allowed_pages"] = {p for pages in SECTIONS.values() for p in pages}
     if not SECTIONS:
         st.sidebar.warning("Für Ihre Rolle sind keine Bereiche freigegeben.")
@@ -1997,16 +1997,17 @@ def login_screen():
     st.markdown(f'<h2 style="text-align:center; color:#e8eaf0; margin-bottom: 4px;">Byblos CRM v2</h2>', unsafe_allow_html=True)
     st.markdown(f'<p style="text-align:center; color:#888; margin-bottom: 24px; font-size:.9rem;">{co_name}</p>', unsafe_allow_html=True)
 
-    # Brute-Force-Schutz: max. 5 Fehlversuche in 15 Min
+    # Brute-Force-Schutz: 5 Fehlversuche je Konto in 15 Min (unten); global nur gegen Massenangriffe,
+    # damit ein einzelnes falsch getipptes Konto nicht alle anderen aussperrt.
     try:
         recent_fails = df("""SELECT COUNT(*) AS n FROM login_attempts
                              WHERE success=0 AND attempt_time > datetime('now','-15 minutes')""")
-        n_fails = int(recent_fails.iloc[0]['n']) if not recent_fails.empty else 0
-        if n_fails >= 5:
-            st.error(f"🚫 Zu viele Fehlversuche ({n_fails}). Bitte 15 Minuten warten.")
+        if int(recent_fails.iloc[0]['n']) >= 50:
+            st.error("🚫 Zu viele Fehlversuche insgesamt. Bitte 15 Minuten warten.")
             st.stop()
     except Exception:
-        n_fails = 0
+        pass
+    n_fails = 0
 
     with st.form("login"):
         username = st.text_input("👤 Benutzername")
@@ -2021,6 +2022,14 @@ def login_screen():
     # die Warnung erscheint nach dem Login für Admins und unter „Betriebsstatus“.
 
     if submit:
+        try:
+            n_fails = int(df("""SELECT COUNT(*) AS n FROM login_attempts WHERE username=? AND success=0
+                                AND attempt_time > datetime('now','-15 minutes')""", (username,)).iloc[0]['n'])
+        except Exception:
+            n_fails = 0
+        if n_fails >= 5:
+            st.error("🚫 Zu viele Fehlversuche für dieses Konto. Bitte 15 Minuten warten.")
+            st.stop()
         u = df("SELECT * FROM users WHERE username=? AND active=1", (username,))
         success = False
         if not u.empty and verify_password(password, u.iloc[0]["password_hash"]):
@@ -2690,7 +2699,8 @@ def main():
         if page:
             log_action("access_denied", str(page))
         st.title("Kein Zugriff")
-        st.error("Diese Seite ist für Ihre Rolle nicht freigegeben.")
+        st.error("Diese Seite ist für Ihre Rolle nicht freigegeben." if crm_stage8.page_available(page)
+                 else "Diese Seite ist in dieser Installation nicht vorhanden (Erweiterungsmodul fehlt).")
         return
 
     # Mobile CSS-Optimierung
@@ -3411,12 +3421,6 @@ def main():
         try:
             from extensions_v2_fieldops import page_zapier_templates
             page_zapier_templates(get_setting)
-        except Exception as e:
-            st.error(f"Fehler: {e}")
-    elif page == "Benachrichtigungen":
-        try:
-            from extensions_v2_security import page_notifications_manager
-            page_notifications_manager(run, df, current_user)
         except Exception as e:
             st.error(f"Fehler: {e}")
     elif page == "ZUGFeRD E-Rechnung":
