@@ -15,8 +15,10 @@ from numbering import next_number_from
 _ADDRESS = {"street": "Hauptstraße 19", "city": "38474 Tülau", "country": "Deutschland",
             "phone": "+49 176 42988324", "vat_id": "DE364648388"}
 ISSUERS = {
-    "Sicherheit": {"name": "Byblos Sicherheitsdienst & Service", "email": "info@byblos-sicherheit.de", **_ADDRESS},
-    "Facility": {"name": "Byblos Reinigung & Hausmeisterservice", "email": "info@byblos-reinigung.de", **_ADDRESS},
+    "Sicherheit": {"name": "Byblos Sicherheitsdienst & Service", "email": "info@byblos-sicherheit.de",
+                   "website": "https://byblos-sicherheit.de", **_ADDRESS},
+    "Facility": {"name": "Byblos Reinigung & Hausmeisterservice", "email": "info@byblos-reinigung.de",
+                 "website": "https://byblos-reinigung.de", **_ADDRESS},
 }
 
 # Steuerfall -> (Steuersatz, Pflichthinweis auf der Rechnung, Begründung nötig)

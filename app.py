@@ -37,6 +37,7 @@ import crm_stage3
 import crm_stage5
 import crm_stage4
 import crm_stage6
+import crm_stage7
 from numbering import next_number_from
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
@@ -558,6 +559,7 @@ def init_db():
         crm_stage3.ensure_tables(c)
         crm_stage4.ensure_columns(c)
         crm_stage6.ensure_tables(c)
+        crm_stage7.ensure_tables(c)
     seed_if_empty()
 
 
@@ -705,7 +707,7 @@ def save_uploaded_receipt(uploaded_file):
     return str(target)
 
 def generate_invoice_pdf(invoice_id):
-    inv = df("""SELECT i.*, c.customer_no,c.company,c.contact_person,c.street,c.zip_city,c.country,c.email,c.phone
+    inv = df("""SELECT i.*, c.customer_no,c.company,c.contact_person,c.street,c.zip_city,c.country,c.email,c.phone,c.sparte
                 FROM invoices i JOIN customers c ON c.id=i.customer_id WHERE i.id=?""", (invoice_id,))
     if inv.empty:
         return None
@@ -725,6 +727,9 @@ def generate_invoice_pdf(invoice_id):
     co_bank  = get_setting("company_bank",    COMPANY.get("bank", ""))
     co_ust   = get_setting("company_ust_id",  COMPANY.get("ust", ""))
     co_tax   = get_setting("company_tax_no",  COMPANY.get("tax_no", ""))
+    if inv.get("sparte") == "Facility":  # Reinigung tritt unter eigenem Namen und eigener Absenderadresse auf
+        fac = crm_stage6.ISSUERS["Facility"]
+        co_name, co_email, co_web = fac["name"], fac["email"], fac["website"]
 
     doc = SimpleDocTemplate(str(path), pagesize=A4, rightMargin=18*mm, leftMargin=18*mm, topMargin=14*mm, bottomMargin=14*mm)
     styles = getSampleStyleSheet()
@@ -1720,7 +1725,7 @@ def sidebar():
 
     # Gruppierte Navigation
     SECTIONS = {
-        "📊 Übersicht": ["Dashboard", "Berichte", "Reporting-Center", "Benachrichtigungen", "Globale Suche"],
+        "📊 Übersicht": ["Dashboard", "KPI & Automationen", "Berichte", "Reporting-Center", "Benachrichtigungen", "Globale Suche"],
         "👥 CRM": ["Kunden", "Leads", "Posteingang", "Kontakte", "Firmenprofile", "Schnellsuche/KI", "KI-Auswertungen"],
         "💰 Finanzen": ["Rechnungen", "Rechnungsentwurf", "Ausgaben/BWA", "Bank/DATEV", "Zahlungen & Mahnwesen", "Offene Posten", "E-Rechnung", "E-Rechnung Prüfung"],
         "📋 Angebote": ["Angebote"],
@@ -2761,6 +2766,9 @@ def main():
     elif page == "Posteingang":
         from extensions_v2_inbox import page_inbox_v2
         page_inbox_v2(conn, df, log_action, crm_stage5.canonical_role((current_user() or {}).get("role")), BASE_DIR / "generated" / "archive")
+    elif page == "KPI & Automationen":
+        from extensions_v2_reporting import page_reporting_v2
+        page_reporting_v2(conn, df, log_action, (current_user() or {}).get("username", ""))
     elif page == "Rechnungsentwurf":
         from extensions_v2_invoicing import page_invoicing_v2
         user = current_user() or {}
