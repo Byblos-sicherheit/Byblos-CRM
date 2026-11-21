@@ -34,6 +34,7 @@ import streamlit as st
 import crm_stage1
 import crm_stage2
 import crm_stage3
+import crm_stage5
 import crm_stage4
 from numbering import next_number_from
 from reportlab.lib import colors
@@ -583,7 +584,7 @@ def current_user():
 
 def require_role(allowed):
     user = current_user()
-    return bool(user and user.get('role') in allowed)
+    return bool(user and crm_stage5.canonical_role(user.get('role')) in {crm_stage5.canonical_role(a) for a in allowed})
 
 def log_action(action, details=''):
     user = current_user() or {}
@@ -1794,6 +1795,11 @@ def sidebar():
 
     }
 
+    SECTIONS = crm_stage5.allowed_sections(role, SECTIONS)
+    st.session_state["_allowed_pages"] = {p for pages in SECTIONS.values() for p in pages}
+    if not SECTIONS:
+        st.sidebar.warning("Für Ihre Rolle sind keine Bereiche freigegeben.")
+        return None
     all_pages = [p for pages in SECTIONS.values() for p in pages]
 
     # Section-Auswahl in der Sidebar
@@ -2209,7 +2215,7 @@ def page_users():
         a,b,c = st.columns(3)
         username = a.text_input("Benutzername")
         password = b.text_input("Passwort", type="password")
-        role = c.selectbox("Rolle", ["Admin", "Büro", "Disposition", "Lesen"])
+        role = c.selectbox("Rolle", crm_stage5.ROLES)
         active = st.checkbox("Aktiv", True)
         if st.form_submit_button("Benutzer anlegen") and username and password:
             run("INSERT OR REPLACE INTO users(username,password_hash,role,active) VALUES(?,?,?,?)", (username, hash_password(password), role, 1 if active else 0))
@@ -2679,6 +2685,13 @@ def main():
     # Nav-Override durch Schnellaktionen
     if "_nav_override" in st.session_state:
         page = st.session_state.pop("_nav_override")
+    # Zweite Prüfung: Schnellaktionen und Favoriten umgehen die Sidebar
+    if page not in st.session_state.get("_allowed_pages", set()):
+        if page:
+            log_action("access_denied", str(page))
+        st.title("Kein Zugriff")
+        st.error("Diese Seite ist für Ihre Rolle nicht freigegeben.")
+        return
 
     # Mobile CSS-Optimierung
     try:
@@ -2745,7 +2758,7 @@ def main():
         page_leads_v2(conn, df, log_action)
     elif page == "Posteingang":
         from extensions_v2_inbox import page_inbox_v2
-        page_inbox_v2(conn, df, log_action, (current_user() or {}).get("role"), BASE_DIR / "generated" / "archive")
+        page_inbox_v2(conn, df, log_action, crm_stage5.canonical_role((current_user() or {}).get("role")), BASE_DIR / "generated" / "archive")
     elif page == "Kontakte":
         try:
             from extensions_v2_core_pages import page_contacts_v2
