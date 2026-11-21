@@ -36,6 +36,7 @@ import crm_stage2
 import crm_stage3
 import crm_stage5
 import crm_stage4
+import crm_stage6
 from numbering import next_number_from
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
@@ -556,6 +557,7 @@ def init_db():
         crm_stage2.ensure_tables(c)
         crm_stage3.ensure_tables(c)
         crm_stage4.ensure_columns(c)
+        crm_stage6.ensure_tables(c)
     seed_if_empty()
 
 
@@ -1720,7 +1722,7 @@ def sidebar():
     SECTIONS = {
         "📊 Übersicht": ["Dashboard", "Berichte", "Reporting-Center", "Benachrichtigungen", "Globale Suche"],
         "👥 CRM": ["Kunden", "Leads", "Posteingang", "Kontakte", "Firmenprofile", "Schnellsuche/KI", "KI-Auswertungen"],
-        "💰 Finanzen": ["Rechnungen", "Ausgaben/BWA", "Bank/DATEV", "Zahlungen & Mahnwesen", "Offene Posten", "E-Rechnung", "E-Rechnung Prüfung"],
+        "💰 Finanzen": ["Rechnungen", "Rechnungsentwurf", "Ausgaben/BWA", "Bank/DATEV", "Zahlungen & Mahnwesen", "Offene Posten", "E-Rechnung", "E-Rechnung Prüfung"],
         "📋 Angebote": ["Angebote"],
         "📥 Import / Export": ["Intelligenter Import", "Mehrfach-Rechnungsimport", "Import", "Export/Backup", "Export & Backup Center"],
         "🚚 Lieferanten": ["Lieferanten"],
@@ -2759,6 +2761,10 @@ def main():
     elif page == "Posteingang":
         from extensions_v2_inbox import page_inbox_v2
         page_inbox_v2(conn, df, log_action, crm_stage5.canonical_role((current_user() or {}).get("role")), BASE_DIR / "generated" / "archive")
+    elif page == "Rechnungsentwurf":
+        from extensions_v2_invoicing import page_invoicing_v2
+        user = current_user() or {}
+        page_invoicing_v2(conn, df, log_action, user.get("username", ""), crm_stage5.canonical_role(user.get("role")))
     elif page == "Kontakte":
         try:
             from extensions_v2_core_pages import page_contacts_v2
