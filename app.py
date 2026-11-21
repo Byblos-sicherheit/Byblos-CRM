@@ -38,6 +38,7 @@ import crm_stage5
 import crm_stage4
 import crm_stage6
 import crm_stage7
+import crm_stage8
 from numbering import next_number_from
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
@@ -560,6 +561,7 @@ def init_db():
         crm_stage4.ensure_columns(c)
         crm_stage6.ensure_tables(c)
         crm_stage7.ensure_tables(c)
+        crm_stage8.ensure_tables(c)
     seed_if_empty()
 
 
@@ -1781,7 +1783,7 @@ def sidebar():
                                  "Debitorenkonten", "UStVA"],
         "⚙️ System": ["Break-Even", "Duplikat-Check", "Budgetwarnungen",
                        "Inventar", "Heatmap-Kalender", "Prognose-Dashboard", "Favoriten",
-                       "Benutzer/Rechte", "Einstellungen", "Systemgesundheit",
+                       "Benutzer/Rechte", "Einstellungen", "Systemgesundheit", "Betriebsstatus",
                        "Massenaktionen", "PDF-Berichte"],
         "💧 Liquidität": ["Liquiditätsplanung"],
         "✓ Validierung": ["Validierungs-Center"],
@@ -2015,17 +2017,8 @@ def login_screen():
             st.session_state["show_2fa"] = True
 
     # Admin-Warnung wenn noch Standard-Passwort
-    try:
-        admin = df("SELECT password_hash FROM users WHERE username='admin'")
-        if not admin.empty:
-            from functools import reduce
-            if verify_password("admin123", admin.iloc[0]["password_hash"]):
-                st.warning("⚠️ **Sicherheitswarnung**: Standardpasswort aktiv. "
-                           "Bitte sofort unter Einstellungen → Passwort ändern!")
-    except Exception:
-        pass
-
-    st.caption("**Erstanmeldung:** admin / admin123 – bitte sofort ändern.")
+    # Keine Zugangsdaten oder Hinweise auf das Standardpasswort vor dem Login anzeigen (Stufe 8);
+    # die Warnung erscheint nach dem Login für Admins und unter „Betriebsstatus“.
 
     if submit:
         u = df("SELECT * FROM users WHERE username=? AND active=1", (username,))
@@ -2064,7 +2057,7 @@ def login_screen():
         token = st.text_input("6-stelliger Code aus Authenticator-App", max_chars=6, key="login_2fa")
         if st.button("✅ Verifizieren", type="primary"):
             try:
-                from extensions_v2_prod1 import verify_totp
+                from crm_stage8 import verify_totp
                 pending = st.session_state.get("_pending_2fa_user", {})
                 tfa_data = df("SELECT totp_secret FROM two_factor_secrets WHERE username=?",
                               (pending.get("username"),))
@@ -2724,6 +2717,10 @@ def main():
         track_page_visit(run, current_user, page)
     except Exception:
         pass
+    if crm_stage5.canonical_role((current_user() or {}).get("role")) == "Inhaber/Admin":
+        admin_row = df("SELECT password_hash FROM users WHERE username='admin' AND active=1")
+        if not admin_row.empty and verify_password(crm_stage8.DEFAULT_ADMIN_PASSWORD, admin_row.iloc[0]["password_hash"]):
+            st.error("⚠️ Das Standardpasswort für „admin“ ist noch aktiv – bitte sofort unter Einstellungen ändern.")
     # Render notification bell in sidebar
     try:
         from extensions_v2_security import render_notification_bell
@@ -2920,6 +2917,10 @@ def main():
             page_pdf_report(df, BASE_DIR)
         except Exception as e:
             st.error(f"Fehler: {e}")
+    elif page == "Betriebsstatus":
+        from extensions_v2_operations import page_operations_v2
+        page_operations_v2(DB_PATH, BASE_DIR / "backups", verify_password, log_action,
+                           crm_stage5.canonical_role((current_user() or {}).get("role")))
     elif page == "Systemgesundheit":
         try:
             from extensions_v2_final import page_system_health
@@ -3624,8 +3625,8 @@ def main():
             st.error(f"Fehler: {e}")
     elif page == "Zwei-Faktor-Auth":
         try:
-            from extensions_v2_prod1 import page_two_factor
-            page_two_factor(run, df, hash_password, verify_password, current_user)
+            from extensions_v2_operations import page_two_factor_v2
+            page_two_factor_v2(conn, log_action, (current_user() or {}).get("username", ""))
         except Exception as e:
             st.error(f"Fehler: {e}")
     elif page == "Angebots-PDF":
