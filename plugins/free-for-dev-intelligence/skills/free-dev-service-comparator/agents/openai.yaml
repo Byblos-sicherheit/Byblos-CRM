@@ -1,0 +1,4 @@
+interface:
+  display_name: "Free Dev Service Comparator"
+  short_description: "Compare and rank verified free-tier candidates"
+  brand_color: "#1677FF"
