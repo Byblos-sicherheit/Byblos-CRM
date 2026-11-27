@@ -18,6 +18,9 @@ byblos_crm_app/byblos_crm.db-wal
 byblos_crm_app/backups/
 /backups/
 byblos_crm.db.vor-wiederherstellung-*
+/byblos_crm.db
+/byblos_crm.db-shm
+/byblos_crm.db-wal
 byblos_crm_app/generated/
 byblos_crm_app/imports/
 byblos_crm_app/assets/logo.*
