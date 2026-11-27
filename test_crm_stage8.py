@@ -179,7 +179,7 @@ def test_page_sources_match_app_dispatch():
 
 def test_missing_pages_are_hidden_and_empty_sections_dropped():
     s8.page_available.cache_clear()
-    sections = {"A": ["Kunden", "Mein Bereich"], "B": ["GPS-Stempeluhr"], "C": ["Intelligenter Import"]}
+    sections = {"A": ["Kunden", "Interne Nachrichten"], "B": ["GPS-Stempeluhr"], "C": ["Intelligenter Import"]}
     assert s8.available_sections(sections) == {"A": ["Kunden"]}, "prod1 existiert, aber ohne Seitenfunktion"
 
 

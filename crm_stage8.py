@@ -73,7 +73,6 @@ PAGE_SOURCES = {
     "Executive Summary": ("extensions_v2_ultra", "page_executive_summary"),
     "Onboarding-Assistent": ("extensions_v2_ultra", "page_onboarding"),
     "Druckansicht Dienstplan": ("extensions_v2_prod2", "page_print_schedule"),
-    "Mein Bereich": ("extensions_v2_prod2", "page_employee_portal"),
     "Interne Nachrichten": ("extensions_v2_prod2", "page_internal_chat"),
     "Remote-Zugang": ("extensions_v2_remote_access", "page_network_access"),
     "Netzwerk-Status": ("extensions_v2_remote_access", "page_network_access"),
