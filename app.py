@@ -39,6 +39,7 @@ import crm_stage4
 import crm_stage6
 import crm_stage7
 import crm_stage8
+import crm_portal
 from numbering import next_number_from
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
@@ -562,6 +563,7 @@ def init_db():
         crm_stage6.ensure_tables(c)
         crm_stage7.ensure_tables(c)
         crm_stage8.ensure_tables(c)
+        crm_portal.ensure_columns(c)
     seed_if_empty()
 
 
@@ -3616,11 +3618,9 @@ def main():
         except Exception as e:
             st.error(f"Fehler: {e}")
     elif page == "Mein Bereich":
-        try:
-            from extensions_v2_prod2 import page_employee_portal
-            page_employee_portal(df, current_user)
-        except Exception as e:
-            st.error(f"Fehler: {e}")
+        from extensions_v2_portal import page_my_area
+        user = current_user() or {}
+        page_my_area(conn, log_action, user.get("username", ""), crm_stage5.canonical_role(user.get("role")))
     elif page == "Interne Nachrichten":
         try:
             from extensions_v2_prod2 import page_internal_chat
